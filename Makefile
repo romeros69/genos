@@ -1,2 +1,5 @@
 build:
-	go build -o bin/genos main.go
+	go build -o bin/genos cmd/main/main.go
+
+clean:
+	rm -rf test/*
