@@ -19,9 +19,16 @@ type Project struct {
 
 
 func (p *Project) CreateStructure() error {
+	
 	err := os.Mkdir(p.Name, 0777)
 	if err != nil {
 		return fmt.Errorf("error in creating directory internal")
+	}
+
+	// TODO: create check path 
+	err = os.Chdir(p.Path + "/" + p.Name)
+	if err != nil {
+		return fmt.Errorf("error in change work directory for genos")
 	}
 	return nil
 }
