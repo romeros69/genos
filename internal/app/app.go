@@ -38,9 +38,11 @@ func Run() {
 
 	fmt.Printf("Please, enter name of application\n>")
 
-	fmt.Scan(&project.Name)
+	var nameProject string
 
-	err := project.CreateStructure()
+	fmt.Scan(&nameProject)
+
+	err := project.CreateStructure(nameProject)
 	if err != nil {
 		panic(err.Error())
 	}
