@@ -2,11 +2,14 @@ package layout
 
 import (
 	"fmt"
+	"genos/internal/commands"
 	"io/fs"
 	"os"
 	"os/exec"
 	"unicode/utf8"
 )
+
+// Команда для создания скилета проекта (genos -g --generate)
 
 const perm fs.FileMode = 0777
 
@@ -15,7 +18,7 @@ type Project struct {
 }
 
 func createGoModule(moduleName string) error {
-	cmd := exec.Command("go", "mod", "init" , moduleName)
+	cmd := exec.Command("go", "mod", "init", moduleName)
 	err := cmd.Run()
 	if err != nil {
 		return fmt.Errorf("error in execute go mod init: %w", err)
@@ -23,20 +26,20 @@ func createGoModule(moduleName string) error {
 	return nil
 }
 
-func createMain() error {
+func createMain() (*os.File, error) {
 	// mkdir cmd/main
 	err := os.MkdirAll("cmd/main", perm)
 	if err != nil {
-		return fmt.Errorf("error in creating /cmd/main directory: %w", err)
+		return nil, fmt.Errorf("error in creating /cmd/main directory: %w", err)
 	}
 
 	// create mian.go
 	f, err := os.Create("cmd/main/main.go")
 	if err != nil {
-		return fmt.Errorf("error in creating file main.go: %w", err)
+		return nil, fmt.Errorf("error in creating file main.go: %w", err)
 	}
-	f.Close()
-	return nil
+	// f.Close() TODO
+	return f, nil
 }
 
 func (p *Project) CreateStructure(nameProject string) error {
@@ -69,7 +72,8 @@ func (p *Project) CreateStructure(nameProject string) error {
 		return err
 	}
 
-	err = createMain()
+	// mkdir cmd/main & touch main.go
+	mainFile, err := createMain()
 	if err != nil {
 		return err
 	}
@@ -97,6 +101,8 @@ func (p *Project) CreateStructure(nameProject string) error {
 	if err != nil {
 		return fmt.Errorf("error in creating pkg directory: %w", err)
 	}
+
+	commands.CreateMainCode(mainFile)
 
 	return nil
 }
