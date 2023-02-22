@@ -81,7 +81,7 @@ func (i *InitLayout) createFileStructure() error {
 	// создание директории проекта
 	err := os.Mkdir(i.NameProject, perm)
 	if err != nil {
-		fmt.Errorf("error in creating general directory: %w", err)
+		return fmt.Errorf("error in creating general directory: %w", err)
 	}
 
 	// изменяем текущую рабучую директорию касательно генератора
