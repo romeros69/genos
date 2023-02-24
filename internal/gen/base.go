@@ -1,4 +1,4 @@
-package gen
+package generate
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func GenMain() error {
+func GenMain(nameModule string) error {
 	f := &ast.File{
 		Name: ast.NewIdent("main"),
 		Decls: []ast.Decl{
@@ -18,7 +18,7 @@ func GenMain() error {
 					&ast.ImportSpec{
 						Path: &ast.BasicLit{
 							Kind:  token.STRING,
-							Value: "\"fmt\"",
+							Value: "\"" + nameModule + "/internal/" + "app\"",
 						},
 					},
 				},
@@ -37,13 +37,67 @@ func GenMain() error {
 						&ast.ExprStmt{
 							X: &ast.CallExpr{
 								Fun: &ast.SelectorExpr{
+									X:   ast.NewIdent("app"),
+									Sel: ast.NewIdent("Run"),
+								},
+								//Args: []ast.Expr{
+								//	&ast.BasicLit{
+								//		Kind:  token.STRING,
+								//		Value: "\"hello, it is genos\"",
+								//	},
+								//},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	fset := token.NewFileSet()
+
+	file, err := os.Create("cmd/main/main.go")
+	if err != nil {
+		return fmt.Errorf("error in creating main.go file: %w", err)
+	}
+	defer file.Close()
+
+	err = printer.Fprint(file, fset, f)
+	if err != nil {
+		return fmt.Errorf("error in genereate main: %w", err)
+	}
+	return nil
+}
+
+func GenApp() error {
+	f := &ast.File{
+		Name: ast.NewIdent("app"),
+		Decls: []ast.Decl{
+			&ast.GenDecl{
+				Tok: token.IMPORT,
+				Specs: []ast.Spec{
+					&ast.ImportSpec{
+						Path: &ast.BasicLit{
+							Kind:  token.STRING,
+							Value: "\"fmt\"",
+						},
+					},
+				},
+			},
+			&ast.FuncDecl{
+				Name: ast.NewIdent("Run"),
+				Type: &ast.FuncType{},
+				Body: &ast.BlockStmt{
+					List: []ast.Stmt{
+						&ast.ExprStmt{
+							X: &ast.CallExpr{
+								Fun: &ast.SelectorExpr{
 									X:   ast.NewIdent("fmt"),
 									Sel: ast.NewIdent("Println"),
 								},
 								Args: []ast.Expr{
 									&ast.BasicLit{
 										Kind:  token.STRING,
-										Value: "\"hello, it is genos\"",
+										Value: "\"Run complete!\"",
 									},
 								},
 							},
@@ -54,15 +108,14 @@ func GenMain() error {
 		},
 	}
 	fset := token.NewFileSet()
-	file, err := os.Create("cmd/main/main.go")
+	file, err := os.Create("internal/app/app.go")
 	if err != nil {
-		return fmt.Errorf("error in creating main.go file: %w", err)
+		return fmt.Errorf("error creating app.go file: %w", err)
 	}
 	defer file.Close()
-
 	err = printer.Fprint(file, fset, f)
 	if err != nil {
-		return fmt.Errorf("error in genereate main: %w", err)
+		return fmt.Errorf("error in generate app.go")
 	}
 	return nil
 }

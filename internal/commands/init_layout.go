@@ -174,9 +174,13 @@ func (i *InitLayout) Do() error {
 	if err != nil {
 		return fmt.Errorf("init layout - do: %w", err)
 	}
-	err = gen.GenMain()
+	err = generate.GenMain(i.NameProject)
 	if err != nil {
 		return fmt.Errorf("error in GenMain(): %w", err)
+	}
+	err = generate.GenApp()
+	if err != nil {
+		return fmt.Errorf("error in GenApp(): %w", err)
 	}
 	return nil
 }
