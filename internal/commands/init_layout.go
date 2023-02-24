@@ -115,6 +115,36 @@ func (i *InitLayout) createFileStructure() error {
 		return fmt.Errorf("error in creating internal directory: %w", err)
 	}
 
+	// mkdir app
+	err = os.Mkdir("internal/app", perm)
+	if err != nil {
+		return fmt.Errorf("error in creating app directory: %w", err)
+	}
+
+	// mkdir controller
+	err = os.Mkdir("internal/controller", perm)
+	if err != nil {
+		return fmt.Errorf("error in creating controller directory: %w", err)
+	}
+
+	// mkdir entity
+	err = os.Mkdir("internal/entity", perm)
+	if err != nil {
+		return fmt.Errorf("error in creating entity directory: %w", err)
+	}
+
+	// mkdir usecase
+	err = os.Mkdir("internal/usecase", perm)
+	if err != nil {
+		return fmt.Errorf("error in creating usecase directory: %w", err)
+	}
+
+	// mkdir repo
+	err = os.Mkdir("internal/usecase/repo", perm)
+	if err != nil {
+		return fmt.Errorf("error in creating repo directory: %w", err)
+	}
+
 	// mkdir pkg
 	err = os.Mkdir("pkg", perm)
 	if err != nil {
