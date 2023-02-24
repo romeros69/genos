@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"genos/internal/gen"
 	"io/fs"
 	"os"
 	"os/exec"
@@ -142,6 +143,10 @@ func (i *InitLayout) Do() error {
 	err = i.createGoModule()
 	if err != nil {
 		return fmt.Errorf("init layout - do: %w", err)
+	}
+	err = gen.GenMain()
+	if err != nil {
+		return fmt.Errorf("error in GenMain(): %w", err)
 	}
 	return nil
 }
