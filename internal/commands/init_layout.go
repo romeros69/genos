@@ -150,6 +150,19 @@ func (i *InitLayout) createFileStructure() error {
 	if err != nil {
 		return fmt.Errorf("error in creating pkg directory: %w", err)
 	}
+
+	// mkdir httpserver
+	err = os.Mkdir("pkg/httpserver", perm)
+	if err != nil {
+		return fmt.Errorf("error in creating httpserver directory: %w", err)
+	}
+
+	// mkdir postgres
+	err = os.Mkdir("pkg/postgres", perm)
+	if err != nil {
+		return fmt.Errorf("error in creating postgres directory: %w", err)
+	}
+
 	return nil
 }
 
@@ -181,6 +194,14 @@ func (i *InitLayout) Do() error {
 	err = generate.GenApp()
 	if err != nil {
 		return fmt.Errorf("error in GenApp(): %w", err)
+	}
+	err = generate.GenHttpServer()
+	if err != nil {
+		return fmt.Errorf("error in GenHttpServer(): %w", err)
+	}
+	err = generate.GenOptionsHttpServer()
+	if err != nil {
+		return fmt.Errorf("error in GenOptionsHttpServer(): %w", err)
 	}
 	return nil
 }

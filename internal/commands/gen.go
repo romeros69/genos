@@ -23,7 +23,7 @@ func main() {
 		log.Fatalf("error in creating main code: %w", err)
 	}
 
-	err = printer.Fprint(file, fset, f)
+	err = printer.Fprint(os.Stdout, fset, f)
 	if err != nil {
 		log.Fatalf("error in print to main.go ast: %w", err)
 	}
