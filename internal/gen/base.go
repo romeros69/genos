@@ -14,6 +14,10 @@ func GenBase(nameModule string) error {
 	if err != nil {
 		return err
 	}
+	err = base.GenConfig()
+	if err != nil {
+		return err
+	}
 	err = base.GenOptionsHttpServer()
 	if err != nil {
 		return err
@@ -26,7 +30,7 @@ func GenBase(nameModule string) error {
 	if err != nil {
 		return err
 	}
-	err = base.GenPostgres()
+	err = base.GenPostgres(nameModule)
 	if err != nil {
 		return err
 	}

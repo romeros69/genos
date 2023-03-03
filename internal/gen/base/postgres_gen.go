@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func createPostgresAST() *ast.File {
+func createPostgresAST(moduleName string) *ast.File {
 	return &ast.File{
 		Name: ast.NewIdent("postgres"),
 		Decls: []ast.Decl{
@@ -36,7 +36,7 @@ func createPostgresAST() *ast.File {
 					3: &ast.ImportSpec{
 						Path: &ast.BasicLit{
 							Kind:  token.STRING,
-							Value: "\"genos/configs\"",
+							Value: "\"" + moduleName + "/configs\"",
 						},
 					},
 					4: &ast.ImportSpec{
@@ -109,7 +109,7 @@ func createPostgresAST() *ast.File {
 										Names: []*ast.Ident{
 											ast.NewIdent("maxPoolSize"),
 										},
-										Type: ast.NewIdent("int"),
+										Type: ast.NewIdent("int32"),
 									},
 									1: {
 										Names: []*ast.Ident{
@@ -163,7 +163,7 @@ func createPostgresAST() *ast.File {
 								},
 								Type: &ast.StarExpr{
 									X: &ast.SelectorExpr{
-										X:   ast.NewIdent("config"),
+										X:   ast.NewIdent("configs"),
 										Sel: ast.NewIdent("Config"),
 									},
 								},
@@ -253,11 +253,8 @@ func createPostgresAST() *ast.File {
 									},
 									Args: []ast.Expr{
 										&ast.SelectorExpr{
-											X: &ast.SelectorExpr{
-												X:   ast.NewIdent("cfg"),
-												Sel: ast.NewIdent("Pg"),
-											},
-											Sel: ast.NewIdent("URL"),
+											X:   ast.NewIdent("cfg"),
+											Sel: ast.NewIdent("PostgresURL"),
 										},
 									},
 								},
@@ -493,8 +490,8 @@ func createPostgresAST() *ast.File {
 	}
 }
 
-func GenPostgres() error {
-	f := createPostgresAST()
+func GenPostgres(moduleName string) error {
+	f := createPostgresAST(moduleName)
 	fset := token.NewFileSet()
 
 	file, err := os.Create("pkg/postgres/postgres.go")

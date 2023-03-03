@@ -51,7 +51,7 @@ func createPostgresOptionsAST() *ast.File {
 								Names: []*ast.Ident{
 									ast.NewIdent("size"),
 								},
-								Type: ast.NewIdent("int"),
+								Type: ast.NewIdent("int32"),
 							},
 						},
 					},
