@@ -187,7 +187,7 @@ func (i *InitLayout) Do() error {
 	if err != nil {
 		return fmt.Errorf("init layout - do: %w", err)
 	}
-	err = generate.GenerateBase(i.NameProject)
+	err = generate.GenBase(i.NameProject)
 	if err != nil {
 		return fmt.Errorf("error in GenereateBase(): %w", err)
 	}

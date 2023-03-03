@@ -4,8 +4,8 @@ import (
 	"genos/internal/gen/base"
 )
 
-// GenerateBase - Генерация основного кода при инициализации макета
-func GenerateBase(nameModule string) error {
+// GenBase - Генерация основного кода при инициализации макета
+func GenBase(nameModule string) error {
 	err := base.GenMain(nameModule)
 	if err != nil {
 		return err
@@ -19,6 +19,10 @@ func GenerateBase(nameModule string) error {
 		return err
 	}
 	err = base.GenHttpServer()
+	if err != nil {
+		return err
+	}
+	err = base.GenPostgresOptions()
 	if err != nil {
 		return err
 	}
