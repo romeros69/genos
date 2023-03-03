@@ -191,22 +191,6 @@ func (i *InitLayout) Do() error {
 	if err != nil {
 		return fmt.Errorf("error in GenereateBase(): %w", err)
 	}
-	//err = generate.GenMain(i.NameProject)
-	//if err != nil {
-	//	return fmt.Errorf("error in GenMain(): %w", err)
-	//}
-	//err = generate.GenApp()
-	//if err != nil {
-	//	return fmt.Errorf("error in GenApp(): %w", err)
-	//}
-	//err = generate.GenHttpServer()
-	//if err != nil {
-	//	return fmt.Errorf("error in GenHttpServer(): %w", err)
-	//}
-	//err = generate.GenOptionsHttpServer()
-	//if err != nil {
-	//	return fmt.Errorf("error in GenOptionsHttpServer(): %w", err)
-	//}
 	return nil
 }
 
