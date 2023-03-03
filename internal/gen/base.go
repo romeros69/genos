@@ -26,5 +26,9 @@ func GenBase(nameModule string) error {
 	if err != nil {
 		return err
 	}
+	err = base.GenPostgres()
+	if err != nil {
+		return err
+	}
 	return nil
 }
