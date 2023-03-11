@@ -239,7 +239,12 @@ func GenConfig() error {
 	if err != nil {
 		return fmt.Errorf("error creating config.go file: %w", err)
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			fmt.Printf("error in closing file %s", file.Name())
+		}
+	}(file)
 	err = printer.Fprint(file, fset, f)
 	if err != nil {
 		return fmt.Errorf("error in generate config.go: %w", err)
