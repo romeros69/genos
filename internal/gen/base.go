@@ -5,12 +5,12 @@ import (
 )
 
 // GenBase - Генерация основного кода при инициализации макета
-func GenBase(nameModule string) error {
-	err := base.GenMain(nameModule)
+func GenBase(moduleName string) error {
+	err := base.GenMain(moduleName)
 	if err != nil {
 		return err
 	}
-	err = base.GenApp()
+	err = base.GenApp(moduleName)
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func GenBase(nameModule string) error {
 	if err != nil {
 		return err
 	}
-	err = base.GenPostgres(nameModule)
+	err = base.GenPostgres(moduleName)
 	if err != nil {
 		return err
 	}
