@@ -1,5 +1,5 @@
 package base
 
-type GeneratorBase interface {
+type Generator interface {
 	GenerateCode() error
 }
