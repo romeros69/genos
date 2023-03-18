@@ -8,6 +8,32 @@ import (
 	"os"
 )
 
+type MainGenerator struct {
+	moduleName string
+	fileName   string
+	file       *os.File
+	fileAST    *ast.File
+}
+
+func NewMainGenerator(moduleName string) *MainGenerator {
+	return &MainGenerator{
+		moduleName: moduleName,
+		fileName:   "cmd/main/main.go",
+	}
+}
+
+var _ Generator = (*MainGenerator)(nil)
+
+func (mg *MainGenerator) GenerateCode() error {
+	mg.fileAST = createMainAST(mg.moduleName)
+	fset := token.NewFileSet()
+	err := printer.Fprint(mg.file, fset, mg.fileAST)
+	if err != nil {
+		return fmt.Errorf("error in genereate main: %w", err)
+	}
+	return nil
+}
+
 func createMainAST(moduleName string) *ast.File {
 	return &ast.File{
 		Name: ast.NewIdent("main"),
@@ -99,27 +125,4 @@ func createMainAST(moduleName string) *ast.File {
 			},
 		},
 	}
-}
-
-// GenMain - генерация main.go
-func GenMain(moduleName string) error {
-	f := createMainAST(moduleName)
-	fset := token.NewFileSet()
-
-	file, err := os.Create("cmd/main/main.go")
-	if err != nil {
-		return fmt.Errorf("error in creating main.go file: %w", err)
-	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			fmt.Printf("error in closing file %s", file.Name())
-		}
-	}(file)
-
-	err = printer.Fprint(file, fset, f)
-	if err != nil {
-		return fmt.Errorf("error in genereate main: %w", err)
-	}
-	return nil
 }
