@@ -2,6 +2,7 @@ package base
 
 import (
 	"fmt"
+	"genos/internal/util"
 	"go/ast"
 	"go/printer"
 	"go/token"
@@ -9,27 +10,35 @@ import (
 )
 
 type MainGenerator struct {
-	moduleName string
-	fileName   string
-	file       *os.File
-	fileAST    *ast.File
+	file           *os.File
+	moduleName     string
+	fullPathToFile string
+	fileAST        *ast.File
 }
 
 func NewMainGenerator(moduleName string) *MainGenerator {
 	return &MainGenerator{
-		moduleName: moduleName,
-		fileName:   "cmd/main/main.go",
+		moduleName:     moduleName,
+		fullPathToFile: "cmd/main/main.go",
 	}
 }
 
 var _ Generator = (*MainGenerator)(nil)
 
 func (mg *MainGenerator) GenerateCode() error {
+	err := mg.preGen()
+	if err != nil {
+		return err
+	}
 	mg.fileAST = createMainAST(mg.moduleName)
 	fset := token.NewFileSet()
-	err := printer.Fprint(mg.file, fset, mg.fileAST)
+	err = printer.Fprint(mg.file, fset, mg.fileAST)
 	if err != nil {
-		return fmt.Errorf("error in genereate main: %w", err)
+		return fmt.Errorf("error in generate %s: %w", mg.file.Name(), err)
+	}
+	err = mg.afterGen()
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -125,4 +134,34 @@ func createMainAST(moduleName string) *ast.File {
 			},
 		},
 	}
+}
+
+func (mg *MainGenerator) preGen() error {
+	var err error
+	mg.file, err = os.Create(mg.fullPathToFile)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (mg *MainGenerator) afterGen() error {
+	// close file
+	err := mg.file.Close()
+	if err != nil {
+		return fmt.Errorf("error in closing file: %w", err)
+	}
+
+	// download dependency
+	err = util.DownloadDependency(mg.fileAST)
+	if err != nil {
+		return fmt.Errorf("error in download dependency: %w", err)
+	}
+
+	// format code
+	err = util.FormatCode(mg.fullPathToFile)
+	if err != nil {
+		return err
+	}
+	return nil
 }

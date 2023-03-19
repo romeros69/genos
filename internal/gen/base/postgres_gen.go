@@ -2,11 +2,47 @@ package base
 
 import (
 	"fmt"
+	"genos/internal/util"
 	"go/ast"
 	"go/printer"
 	"go/token"
 	"os"
 )
+
+type PostgresGenerator struct {
+	file           *os.File
+	moduleName     string
+	fullPathToFile string
+	fileAST        *ast.File
+}
+
+func NewPostgresGenerator(moduleName string) *PostgresGenerator {
+	return &PostgresGenerator{
+		moduleName:     moduleName,
+		fullPathToFile: "pkg/postgres/postgres.go",
+	}
+}
+
+var _ Generator = (*PostgresGenerator)(nil)
+
+func (p *PostgresGenerator) GenerateCode() error {
+	err := p.preGen()
+	if err != nil {
+		return err
+	}
+	p.fileAST = createPostgresAST(p.moduleName)
+	fset := token.NewFileSet()
+
+	err = printer.Fprint(p.file, fset, p.fileAST)
+	if err != nil {
+		return fmt.Errorf("error in generate %s: %w", p.file.Name(), err)
+	}
+	err = p.afterGen()
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func createPostgresAST(moduleName string) *ast.File {
 	return &ast.File{
@@ -490,24 +526,32 @@ func createPostgresAST(moduleName string) *ast.File {
 	}
 }
 
-func GenPostgres(moduleName string) error {
-	f := createPostgresAST(moduleName)
-	fset := token.NewFileSet()
-
-	file, err := os.Create("pkg/postgres/postgres.go")
+func (p *PostgresGenerator) preGen() error {
+	var err error
+	p.file, err = os.Create(p.fullPathToFile)
 	if err != nil {
-		return fmt.Errorf("error in creating postgres.go file: %w", err)
+		return err
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			fmt.Printf("error in closing file %s", file.Name())
-		}
-	}(file)
+	return nil
+}
 
-	err = printer.Fprint(file, fset, f)
+func (p *PostgresGenerator) afterGen() error {
+	// close file
+	err := p.file.Close()
 	if err != nil {
-		return fmt.Errorf("error in genereate postgres: %w", err)
+		return fmt.Errorf("error in closing file: %w", err)
+	}
+
+	// download dependency
+	err = util.DownloadDependency(p.fileAST)
+	if err != nil {
+		return fmt.Errorf("error in download dependency: %w", err)
+	}
+
+	// format code
+	err = util.FormatCode(p.fullPathToFile)
+	if err != nil {
+		return err
 	}
 	return nil
 }

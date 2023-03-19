@@ -2,11 +2,46 @@ package base
 
 import (
 	"fmt"
+	"genos/internal/util"
 	"go/ast"
 	"go/printer"
 	"go/token"
 	"os"
 )
+
+type AppGenerator struct {
+	file           *os.File
+	moduleName     string
+	fullPathToFile string
+	fileAST        *ast.File
+}
+
+func NewAppGenerator(moduleName string) *AppGenerator {
+	return &AppGenerator{
+		moduleName:     moduleName,
+		fullPathToFile: "internal/app/app.go",
+	}
+}
+
+var _ Generator = (*AppGenerator)(nil)
+
+func (ag *AppGenerator) GenerateCode() error {
+	err := ag.preGen()
+	if err != nil {
+		return err
+	}
+	ag.fileAST = createAppAST(ag.moduleName)
+	fset := token.NewFileSet()
+	err = printer.Fprint(ag.file, fset, ag.fileAST)
+	if err != nil {
+		return fmt.Errorf("error in generate %s: %w", ag.file.Name(), err)
+	}
+	err = ag.afterGen()
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func createAppAST(moduleName string) *ast.File {
 	return &ast.File{
@@ -457,23 +492,32 @@ func createAppAST(moduleName string) *ast.File {
 	}
 }
 
-// GenApp - Генерация App.go
-func GenApp(moduleName string) error {
-	f := createAppAST(moduleName)
-	fset := token.NewFileSet()
-	file, err := os.Create("internal/app/app.go")
+func (ag *AppGenerator) preGen() error {
+	var err error
+	ag.file, err = os.Create(ag.fullPathToFile)
 	if err != nil {
-		return fmt.Errorf("error creating app.go file: %w", err)
+		return err
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			fmt.Printf("error in closing file %s", file.Name())
-		}
-	}(file)
-	err = printer.Fprint(file, fset, f)
+	return nil
+}
+
+func (ag *AppGenerator) afterGen() error {
+	// close file
+	err := ag.file.Close()
 	if err != nil {
-		return fmt.Errorf("error in generate app.go: %w", err)
+		return fmt.Errorf("error in closing file: %w", err)
+	}
+
+	// download dependency
+	err = util.DownloadDependency(ag.fileAST)
+	if err != nil {
+		return fmt.Errorf("error in download dependency: %w", err)
+	}
+
+	// format code
+	err = util.FormatCode(ag.fullPathToFile)
+	if err != nil {
+		return err
 	}
 	return nil
 }

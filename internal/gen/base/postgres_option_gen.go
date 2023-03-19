@@ -2,11 +2,47 @@ package base
 
 import (
 	"fmt"
+	"genos/internal/util"
 	"go/ast"
 	"go/printer"
 	"go/token"
 	"os"
 )
+
+type PostgresOptionGenerator struct {
+	file           *os.File
+	moduleName     string
+	fullPathToFile string
+	fileAST        *ast.File
+}
+
+func NewPostgresOptionGenerator(moduleName string) *PostgresOptionGenerator {
+	return &PostgresOptionGenerator{
+		moduleName:     moduleName,
+		fullPathToFile: "pkg/postgres/options.go",
+	}
+}
+
+var _ Generator = (*PostgresOptionGenerator)(nil)
+
+func (po *PostgresOptionGenerator) GenerateCode() error {
+	err := po.preGen()
+	if err != nil {
+		return err
+	}
+	po.fileAST = createPostgresOptionsAST()
+	fset := token.NewFileSet()
+
+	err = printer.Fprint(po.file, fset, po.fileAST)
+	if err != nil {
+		return fmt.Errorf("error in generate %s: %w", po.file.Name(), err)
+	}
+	err = po.afterGen()
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func createPostgresOptionsAST() *ast.File {
 	return &ast.File{
@@ -235,24 +271,32 @@ func createPostgresOptionsAST() *ast.File {
 	}
 }
 
-func GenPostgresOptions() error {
-	f := createPostgresOptionsAST()
-	fset := token.NewFileSet()
-
-	file, err := os.Create("pkg/postgres/options.go")
+func (po *PostgresOptionGenerator) preGen() error {
+	var err error
+	po.file, err = os.Create(po.fullPathToFile)
 	if err != nil {
-		return fmt.Errorf("error in creating main.go file: %w", err)
+		return err
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			fmt.Printf("error in closing file %s", file.Name())
-		}
-	}(file)
+	return nil
+}
 
-	err = printer.Fprint(file, fset, f)
+func (po *PostgresOptionGenerator) afterGen() error {
+	// close file
+	err := po.file.Close()
 	if err != nil {
-		return fmt.Errorf("error in genereate postgres option: %w", err)
+		return fmt.Errorf("error in closing file: %w", err)
+	}
+
+	// download dependency
+	err = util.DownloadDependency(po.fileAST)
+	if err != nil {
+		return fmt.Errorf("error in download dependency: %w", err)
+	}
+
+	// format code
+	err = util.FormatCode(po.fullPathToFile)
+	if err != nil {
+		return err
 	}
 	return nil
 }
