@@ -2,25 +2,55 @@ package base
 
 import (
 	"fmt"
+	"genos/internal/util"
 	"go/ast"
 	"go/printer"
 	"go/token"
 	"os"
 )
 
-func createHttpOptionsAST() *ast.File {
+type PostgresOptionGenerator struct {
+	file           *os.File
+	moduleName     string
+	fullPathToFile string
+	fileAST        *ast.File
+}
+
+func NewPostgresOptionGenerator(moduleName string) *PostgresOptionGenerator {
+	return &PostgresOptionGenerator{
+		moduleName:     moduleName,
+		fullPathToFile: "pkg/postgres/options.go",
+	}
+}
+
+var _ Generator = (*PostgresOptionGenerator)(nil)
+
+func (po *PostgresOptionGenerator) GenerateCode() error {
+	err := po.preGen()
+	if err != nil {
+		return err
+	}
+	po.fileAST = createPostgresOptionsAST()
+	fset := token.NewFileSet()
+
+	err = printer.Fprint(po.file, fset, po.fileAST)
+	if err != nil {
+		return fmt.Errorf("error in generate %s: %w", po.file.Name(), err)
+	}
+	err = po.afterGen()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func createPostgresOptionsAST() *ast.File {
 	return &ast.File{
-		Name: ast.NewIdent("httpserver"),
+		Name: ast.NewIdent("postgres"),
 		Decls: []ast.Decl{
 			0: &ast.GenDecl{
 				Tok: token.IMPORT,
 				Specs: []ast.Spec{
-					&ast.ImportSpec{
-						Path: &ast.BasicLit{
-							Kind:  token.STRING,
-							Value: "\"net\"",
-						},
-					},
 					&ast.ImportSpec{
 						Path: &ast.BasicLit{
 							Kind:  token.STRING,
@@ -39,7 +69,7 @@ func createHttpOptionsAST() *ast.File {
 								List: []*ast.Field{
 									{
 										Type: &ast.StarExpr{
-											X: ast.NewIdent("Server"),
+											X: ast.NewIdent("Postgres"),
 										},
 									},
 								},
@@ -49,15 +79,15 @@ func createHttpOptionsAST() *ast.File {
 				},
 			},
 			2: &ast.FuncDecl{
-				Name: ast.NewIdent("Port"),
+				Name: ast.NewIdent("MaxPoolSize"),
 				Type: &ast.FuncType{
 					Params: &ast.FieldList{
 						List: []*ast.Field{
 							{
 								Names: []*ast.Ident{
-									ast.NewIdent("port"),
+									ast.NewIdent("size"),
 								},
-								Type: ast.NewIdent("string"),
+								Type: ast.NewIdent("int32"),
 							},
 						},
 					},
@@ -79,10 +109,10 @@ func createHttpOptionsAST() *ast.File {
 											List: []*ast.Field{
 												{
 													Names: []*ast.Ident{
-														ast.NewIdent("s"),
+														ast.NewIdent("c"),
 													},
 													Type: &ast.StarExpr{
-														X: ast.NewIdent("Server"),
+														X: ast.NewIdent("Postgres"),
 													},
 												},
 											},
@@ -93,28 +123,13 @@ func createHttpOptionsAST() *ast.File {
 											&ast.AssignStmt{
 												Lhs: []ast.Expr{
 													&ast.SelectorExpr{
-														X: &ast.SelectorExpr{
-															X:   ast.NewIdent("s"),
-															Sel: ast.NewIdent("server"),
-														},
-														Sel: ast.NewIdent("Addr"),
+														X:   ast.NewIdent("c"),
+														Sel: ast.NewIdent("maxPoolSize"),
 													},
 												},
 												Tok: token.ASSIGN,
 												Rhs: []ast.Expr{
-													&ast.CallExpr{
-														Fun: &ast.SelectorExpr{
-															X:   ast.NewIdent("net"),
-															Sel: ast.NewIdent("JoinHostPort"),
-														},
-														Args: []ast.Expr{
-															0: &ast.BasicLit{
-																Kind:  token.STRING,
-																Value: "\"\"",
-															},
-															1: ast.NewIdent("port"),
-														},
-													},
+													ast.NewIdent("size"),
 												},
 											},
 										},
@@ -125,20 +140,16 @@ func createHttpOptionsAST() *ast.File {
 					},
 				},
 			},
-			// 3
 			3: &ast.FuncDecl{
-				Name: ast.NewIdent("ReadTimeout"),
+				Name: ast.NewIdent("ConnAttempts"),
 				Type: &ast.FuncType{
 					Params: &ast.FieldList{
 						List: []*ast.Field{
 							{
 								Names: []*ast.Ident{
-									ast.NewIdent("timeout"),
+									ast.NewIdent("attempts"),
 								},
-								Type: &ast.SelectorExpr{
-									X:   ast.NewIdent("time"),
-									Sel: ast.NewIdent("Duration"),
-								},
+								Type: ast.NewIdent("int"),
 							},
 						},
 					},
@@ -160,10 +171,10 @@ func createHttpOptionsAST() *ast.File {
 											List: []*ast.Field{
 												{
 													Names: []*ast.Ident{
-														ast.NewIdent("s"),
+														ast.NewIdent("c"),
 													},
 													Type: &ast.StarExpr{
-														X: ast.NewIdent("Server"),
+														X: ast.NewIdent("Postgres"),
 													},
 												},
 											},
@@ -174,16 +185,13 @@ func createHttpOptionsAST() *ast.File {
 											&ast.AssignStmt{
 												Lhs: []ast.Expr{
 													&ast.SelectorExpr{
-														X: &ast.SelectorExpr{
-															X:   ast.NewIdent("s"),
-															Sel: ast.NewIdent("server"),
-														},
-														Sel: ast.NewIdent("ReadTimeout"),
+														X:   ast.NewIdent("c"),
+														Sel: ast.NewIdent("connAttempts"),
 													},
 												},
 												Tok: token.ASSIGN,
 												Rhs: []ast.Expr{
-													ast.NewIdent("timeout"),
+													ast.NewIdent("attempts"),
 												},
 											},
 										},
@@ -195,7 +203,7 @@ func createHttpOptionsAST() *ast.File {
 				},
 			},
 			4: &ast.FuncDecl{
-				Name: ast.NewIdent("WriteTimeout"),
+				Name: ast.NewIdent("ConnTimeout"),
 				Type: &ast.FuncType{
 					Params: &ast.FieldList{
 						List: []*ast.Field{
@@ -228,10 +236,10 @@ func createHttpOptionsAST() *ast.File {
 											List: []*ast.Field{
 												{
 													Names: []*ast.Ident{
-														ast.NewIdent("s"),
+														ast.NewIdent("c"),
 													},
 													Type: &ast.StarExpr{
-														X: ast.NewIdent("Server"),
+														X: ast.NewIdent("Postgres"),
 													},
 												},
 											},
@@ -242,76 +250,8 @@ func createHttpOptionsAST() *ast.File {
 											&ast.AssignStmt{
 												Lhs: []ast.Expr{
 													&ast.SelectorExpr{
-														X: &ast.SelectorExpr{
-															X:   ast.NewIdent("s"),
-															Sel: ast.NewIdent("server"),
-														},
-														Sel: ast.NewIdent("WriteTimeout"),
-													},
-												},
-												Tok: token.ASSIGN,
-												Rhs: []ast.Expr{
-													ast.NewIdent("timeout"),
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			5: &ast.FuncDecl{
-				Name: ast.NewIdent("ShutdownTimeout"),
-				Type: &ast.FuncType{
-					Params: &ast.FieldList{
-						List: []*ast.Field{
-							{
-								Names: []*ast.Ident{
-									ast.NewIdent("timeout"),
-								},
-								Type: &ast.SelectorExpr{
-									X:   ast.NewIdent("time"),
-									Sel: ast.NewIdent("Duration"),
-								},
-							},
-						},
-					},
-					Results: &ast.FieldList{
-						List: []*ast.Field{
-							{
-								Type: ast.NewIdent("Option"),
-							},
-						},
-					},
-				},
-				Body: &ast.BlockStmt{
-					List: []ast.Stmt{
-						&ast.ReturnStmt{
-							Results: []ast.Expr{
-								&ast.FuncLit{
-									Type: &ast.FuncType{
-										Params: &ast.FieldList{
-											List: []*ast.Field{
-												{
-													Names: []*ast.Ident{
-														ast.NewIdent("s"),
-													},
-													Type: &ast.StarExpr{
-														X: ast.NewIdent("Server"),
-													},
-												},
-											},
-										},
-									},
-									Body: &ast.BlockStmt{
-										List: []ast.Stmt{
-											&ast.AssignStmt{
-												Lhs: []ast.Expr{
-													&ast.SelectorExpr{
-														X:   ast.NewIdent("s"),
-														Sel: ast.NewIdent("shutdownTimeout"),
+														X:   ast.NewIdent("c"),
+														Sel: ast.NewIdent("connTimeout"),
 													},
 												},
 												Tok: token.ASSIGN,
@@ -331,18 +271,32 @@ func createHttpOptionsAST() *ast.File {
 	}
 }
 
-// GenOptionsHttpServer - Генерация option.go (httpserver)
-func GenOptionsHttpServer() error {
-	f := createHttpOptionsAST()
-	fset := token.NewFileSet()
-	file, err := os.Create("pkg/httpserver/option.go")
+func (po *PostgresOptionGenerator) preGen() error {
+	var err error
+	po.file, err = os.Create(po.fullPathToFile)
 	if err != nil {
-		return fmt.Errorf("error creating app.go file: %w", err)
+		return err
 	}
-	defer file.Close()
-	err = printer.Fprint(file, fset, f)
+	return nil
+}
+
+func (po *PostgresOptionGenerator) afterGen() error {
+	// close file
+	err := po.file.Close()
 	if err != nil {
-		return fmt.Errorf("error in generate server.go (http server): %w", err)
+		return fmt.Errorf("error in closing file: %w", err)
+	}
+
+	// download dependency
+	err = util.DownloadDependency(po.fileAST)
+	if err != nil {
+		return fmt.Errorf("error in download dependency: %w", err)
+	}
+
+	// format code
+	err = util.FormatCode(po.fullPathToFile)
+	if err != nil {
+		return err
 	}
 	return nil
 }
