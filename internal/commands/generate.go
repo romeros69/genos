@@ -1,6 +1,7 @@
 package commands
 
 type Generate struct {
+	PathToDSL string
 }
 
 // Do TODO
