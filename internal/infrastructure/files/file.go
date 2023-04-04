@@ -9,16 +9,16 @@ import (
 	"os"
 )
 
-type FileWorker struct {
+type FileSource struct {
 }
 
-func NewFileWorker() *FileWorker {
-	return &FileWorker{}
+func NewFileWorker() *FileSource {
+	return &FileSource{}
 }
 
-var _ usecase.FileStorage = (*FileWorker)(nil)
+var _ usecase.FileSourceWorker = (*FileSource)(nil)
 
-func (fw *FileWorker) CreateFile(path string) (*os.File, error) {
+func (fw *FileSource) CreateFile(path string) (*os.File, error) {
 	var err error
 	file, err := os.Create(path)
 	if err != nil {
@@ -27,7 +27,7 @@ func (fw *FileWorker) CreateFile(path string) (*os.File, error) {
 	return file, nil
 }
 
-func (fw *FileWorker) WriteAST(file *os.File, ast *ast.File) error {
+func (fw *FileSource) WriteAST(file *os.File, ast *ast.File) error {
 	fset := token.NewFileSet()
 	err := printer.Fprint(file, fset, ast)
 	if err != nil {
@@ -36,7 +36,7 @@ func (fw *FileWorker) WriteAST(file *os.File, ast *ast.File) error {
 	return nil
 }
 
-func (fw *FileWorker) CloseFile(file *os.File) error {
+func (fw *FileSource) CloseFile(file *os.File) error {
 	err := file.Close()
 	if err != nil {
 		return fmt.Errorf("error in closing file %s: %w", file.Name(), err)
