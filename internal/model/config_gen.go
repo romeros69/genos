@@ -3,24 +3,25 @@ package model
 import (
 	"go/ast"
 	"go/token"
-	"os"
 )
 
 type ConfigGenerator struct {
-	file           *os.File
-	moduleName     string
 	fullPathToFile string
-	fileAST        *ast.File
 }
 
-func NewConfigGenerator(moduleName string) *ConfigGenerator {
+var _ BaseGenerator = (*ConfigGenerator)(nil)
+
+func NewConfigGenerator() *ConfigGenerator {
 	return &ConfigGenerator{
-		moduleName:     moduleName,
 		fullPathToFile: "configs/configs.go",
 	}
 }
 
-func (cg *ConfigGenerator) GetAST() *ast.File {
+func (cg *ConfigGenerator) FullPathToFile() string {
+	return cg.fullPathToFile
+}
+
+func (cg *ConfigGenerator) GenAST() *ast.File {
 	return &ast.File{
 		Name: ast.NewIdent("configs"),
 		Decls: []ast.Decl{

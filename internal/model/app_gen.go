@@ -3,15 +3,14 @@ package model
 import (
 	"go/ast"
 	"go/token"
-	"os"
 )
 
 type AppGenerator struct {
-	file           *os.File
-	moduleName     string
 	fullPathToFile string
-	fileAST        *ast.File
+	moduleName     string
 }
+
+var _ BaseGenerator = (*AppGenerator)(nil)
 
 func NewAppGenerator(moduleName string) *AppGenerator {
 	return &AppGenerator{
@@ -20,7 +19,11 @@ func NewAppGenerator(moduleName string) *AppGenerator {
 	}
 }
 
-func (ag *AppGenerator) GetAST(moduleName string) *ast.File {
+func (ag *AppGenerator) FullPathToFile() string {
+	return ag.fullPathToFile
+}
+
+func (ag *AppGenerator) GenAST() *ast.File {
 	return &ast.File{
 		Name: ast.NewIdent("app"),
 		Decls: []ast.Decl{
@@ -48,19 +51,19 @@ func (ag *AppGenerator) GetAST(moduleName string) *ast.File {
 					3: &ast.ImportSpec{
 						Path: &ast.BasicLit{
 							Kind:  token.STRING,
-							Value: "\"" + moduleName + "/configs\"",
+							Value: "\"" + ag.moduleName + "/configs\"",
 						},
 					},
 					4: &ast.ImportSpec{
 						Path: &ast.BasicLit{
 							Kind:  token.STRING,
-							Value: "\"" + moduleName + "/pkg/httpserver\"",
+							Value: "\"" + ag.moduleName + "/pkg/httpserver\"",
 						},
 					},
 					5: &ast.ImportSpec{
 						Path: &ast.BasicLit{
 							Kind:  token.STRING,
-							Value: "\"" + moduleName + "/pkg/postgres\"",
+							Value: "\"" + ag.moduleName + "/pkg/postgres\"",
 						},
 					},
 					6: &ast.ImportSpec{

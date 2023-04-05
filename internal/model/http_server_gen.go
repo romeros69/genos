@@ -3,24 +3,25 @@ package model
 import (
 	"go/ast"
 	"go/token"
-	"os"
 )
 
 type HttpServerGenerator struct {
-	file           *os.File
-	moduleName     string
 	fullPathToFile string
-	fileAST        *ast.File
 }
 
-func NewHttpServerGenerator(moduleName string) *HttpServerGenerator {
+var _ BaseGenerator = (*HttpServerGenerator)(nil)
+
+func NewHttpServerGenerator() *HttpServerGenerator {
 	return &HttpServerGenerator{
-		moduleName:     moduleName,
 		fullPathToFile: "pkg/httpserver/server.go",
 	}
 }
 
-func (hs *HttpServerGenerator) GetAST() *ast.File {
+func (hs *HttpServerGenerator) FullPathToFile() string {
+	return hs.fullPathToFile
+}
+
+func (hs *HttpServerGenerator) GenAST() *ast.File {
 	return &ast.File{
 		Name: ast.NewIdent("httpserver"),
 		Decls: []ast.Decl{

@@ -3,24 +3,25 @@ package model
 import (
 	"go/ast"
 	"go/token"
-	"os"
 )
 
 type HttpOptionsGenerator struct {
-	file           *os.File
-	moduleName     string
 	fullPathToFile string
-	fileAST        *ast.File
 }
 
-func NewHttpOptionsGenerator(moduleName string) *HttpOptionsGenerator {
+var _ BaseGenerator = (*HttpOptionsGenerator)(nil)
+
+func NewHttpOptionsGenerator() *HttpOptionsGenerator {
 	return &HttpOptionsGenerator{
-		moduleName:     moduleName,
 		fullPathToFile: "pkg/httpserver/options.go",
 	}
 }
 
-func (ho *HttpOptionsGenerator) GetAST() *ast.File {
+func (ho *HttpOptionsGenerator) FullPathToFile() string {
+	return ho.fullPathToFile
+}
+
+func (ho *HttpOptionsGenerator) GenAST() *ast.File {
 	return &ast.File{
 		Name: ast.NewIdent("httpserver"),
 		Decls: []ast.Decl{

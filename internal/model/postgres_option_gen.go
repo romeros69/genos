@@ -3,24 +3,25 @@ package model
 import (
 	"go/ast"
 	"go/token"
-	"os"
 )
 
 type PostgresOptionGenerator struct {
-	file           *os.File
-	moduleName     string
 	fullPathToFile string
-	fileAST        *ast.File
 }
 
-func NewPostgresOptionGenerator(moduleName string) *PostgresOptionGenerator {
+var _ BaseGenerator = (*PostgresOptionGenerator)(nil)
+
+func NewPostgresOptionGenerator() *PostgresOptionGenerator {
 	return &PostgresOptionGenerator{
-		moduleName:     moduleName,
 		fullPathToFile: "pkg/postgres/options.go",
 	}
 }
 
-func (po *PostgresOptionGenerator) GetAST() *ast.File {
+func (po *PostgresOptionGenerator) FullPathToFile() string {
+	return po.fullPathToFile
+}
+
+func (po *PostgresOptionGenerator) GenAST() *ast.File {
 	return &ast.File{
 		Name: ast.NewIdent("postgres"),
 		Decls: []ast.Decl{

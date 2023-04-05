@@ -3,15 +3,14 @@ package model
 import (
 	"go/ast"
 	"go/token"
-	"os"
 )
 
 type MainGenerator struct {
-	file           *os.File
 	moduleName     string
 	fullPathToFile string
-	fileAST        *ast.File
 }
+
+var _ BaseGenerator = (*MainGenerator)(nil)
 
 func NewMainGenerator(moduleName string) *MainGenerator {
 	return &MainGenerator{
@@ -20,7 +19,11 @@ func NewMainGenerator(moduleName string) *MainGenerator {
 	}
 }
 
-func GetAST(moduleName string) *ast.File {
+func (mg *MainGenerator) FullPathToFile() string {
+	return mg.fullPathToFile
+}
+
+func (mg *MainGenerator) GenAST() *ast.File {
 	return &ast.File{
 		Name: ast.NewIdent("main"),
 		Decls: []ast.Decl{
@@ -36,13 +39,13 @@ func GetAST(moduleName string) *ast.File {
 					1: &ast.ImportSpec{
 						Path: &ast.BasicLit{
 							Kind:  token.STRING,
-							Value: "\"" + moduleName + "/configs\"",
+							Value: "\"" + mg.moduleName + "/configs\"",
 						},
 					},
 					2: &ast.ImportSpec{
 						Path: &ast.BasicLit{
 							Kind:  token.STRING,
-							Value: "\"" + moduleName + "/internal/app\"",
+							Value: "\"" + mg.moduleName + "/internal/app\"",
 						},
 					},
 				},
