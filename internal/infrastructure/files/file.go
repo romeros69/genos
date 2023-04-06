@@ -2,7 +2,7 @@ package files
 
 import (
 	"fmt"
-	"genos/internal/usecase"
+	"genos/internal/service"
 	"go/ast"
 	"go/printer"
 	"go/token"
@@ -12,11 +12,11 @@ import (
 type FileSource struct {
 }
 
-func NewFileWorker() *FileSource {
+func NewFileSource() *FileSource {
 	return &FileSource{}
 }
 
-var _ usecase.FileSourceWorker = (*FileSource)(nil)
+var _ service.FileSourceWorker = (*FileSource)(nil)
 
 func (fw *FileSource) CreateFile(path string) (*os.File, error) {
 	var err error

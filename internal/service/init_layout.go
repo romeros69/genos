@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"genos/internal/domain"
 	"genos/internal/util"
+	"os/exec"
 )
 
 type GenerateBase struct {
@@ -13,6 +14,8 @@ type GenerateBase struct {
 func NewGenerateSource(fw FileSourceWorker) *GenerateBase {
 	return &GenerateBase{fw: fw}
 }
+
+var _ GenerateBaseContract = (*GenerateBase)(nil)
 
 func (gs *GenerateBase) initBaseGenerators(moduleName string) []domain.BaseGenerator {
 	return []domain.BaseGenerator{
@@ -26,8 +29,8 @@ func (gs *GenerateBase) initBaseGenerators(moduleName string) []domain.BaseGener
 	}
 }
 
-// GenerateBaseCode Генерация базового кода
-func (gs *GenerateBase) GenerateBaseCode(moduleName string) error {
+// Генерация базового кода - все таки это только часть выполнения определенной команды
+func (gs *GenerateBase) generateBaseCode(moduleName string) error {
 	baseGenerators := gs.initBaseGenerators(moduleName)
 	for _, v := range baseGenerators {
 		file, err := gs.fw.CreateFile(v.FullPathToFile())
@@ -51,6 +54,15 @@ func (gs *GenerateBase) GenerateBaseCode(moduleName string) error {
 		if err != nil {
 			return fmt.Errorf("error in GenerateBaseCode: %w", err)
 		}
+	}
+	return nil
+}
+
+func (gs *GenerateBase) createGoModule(nameProject string) error {
+	cmd := exec.Command("go", "mod", "init", nameProject)
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("error in execute go mod init: %w", err)
 	}
 	return nil
 }
