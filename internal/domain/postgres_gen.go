@@ -1,20 +1,16 @@
-package base
+package domain
 
 import (
-	"fmt"
-	"genos/internal/util"
 	"go/ast"
-	"go/printer"
 	"go/token"
-	"os"
 )
 
 type PostgresGenerator struct {
-	file           *os.File
-	moduleName     string
 	fullPathToFile string
-	fileAST        *ast.File
+	moduleName     string
 }
+
+var _ BaseGenerator = (*PostgresGenerator)(nil)
 
 func NewPostgresGenerator(moduleName string) *PostgresGenerator {
 	return &PostgresGenerator{
@@ -23,28 +19,11 @@ func NewPostgresGenerator(moduleName string) *PostgresGenerator {
 	}
 }
 
-var _ Generator = (*PostgresGenerator)(nil)
-
-func (p *PostgresGenerator) GenerateCode() error {
-	err := p.preGen()
-	if err != nil {
-		return err
-	}
-	p.fileAST = createPostgresAST(p.moduleName)
-	fset := token.NewFileSet()
-
-	err = printer.Fprint(p.file, fset, p.fileAST)
-	if err != nil {
-		return fmt.Errorf("error in generate %s: %w", p.file.Name(), err)
-	}
-	err = p.afterGen()
-	if err != nil {
-		return err
-	}
-	return nil
+func (p *PostgresGenerator) FullPathToFile() string {
+	return p.fullPathToFile
 }
 
-func createPostgresAST(moduleName string) *ast.File {
+func (p *PostgresGenerator) GenAST() *ast.File {
 	return &ast.File{
 		Name: ast.NewIdent("postgres"),
 		Decls: []ast.Decl{
@@ -72,7 +51,7 @@ func createPostgresAST(moduleName string) *ast.File {
 					3: &ast.ImportSpec{
 						Path: &ast.BasicLit{
 							Kind:  token.STRING,
-							Value: "\"" + moduleName + "/configs\"",
+							Value: "\"" + p.moduleName + "/configs\"",
 						},
 					},
 					4: &ast.ImportSpec{
@@ -524,34 +503,4 @@ func createPostgresAST(moduleName string) *ast.File {
 			},
 		},
 	}
-}
-
-func (p *PostgresGenerator) preGen() error {
-	var err error
-	p.file, err = os.Create(p.fullPathToFile)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (p *PostgresGenerator) afterGen() error {
-	// close file
-	err := p.file.Close()
-	if err != nil {
-		return fmt.Errorf("error in closing file: %w", err)
-	}
-
-	// download dependency
-	err = util.DownloadDependency(p.fileAST)
-	if err != nil {
-		return fmt.Errorf("error in download dependency: %w", err)
-	}
-
-	// format code
-	err = util.FormatCode(p.fullPathToFile)
-	if err != nil {
-		return err
-	}
-	return nil
 }

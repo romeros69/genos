@@ -1,50 +1,27 @@
-package base
+package domain
 
 import (
-	"fmt"
-	"genos/internal/util"
 	"go/ast"
-	"go/printer"
 	"go/token"
-	"os"
 )
 
 type HttpOptionsGenerator struct {
-	file           *os.File
-	moduleName     string
 	fullPathToFile string
-	fileAST        *ast.File
 }
 
-func NewHttpOptionsGenerator(moduleName string) *HttpOptionsGenerator {
+var _ BaseGenerator = (*HttpOptionsGenerator)(nil)
+
+func NewHttpOptionsGenerator() *HttpOptionsGenerator {
 	return &HttpOptionsGenerator{
-		moduleName:     moduleName,
 		fullPathToFile: "pkg/httpserver/options.go",
 	}
 }
 
-var _ Generator = (*HttpOptionsGenerator)(nil)
-
-func (ho *HttpOptionsGenerator) GenerateCode() error {
-	err := ho.preGen()
-	if err != nil {
-		return err
-	}
-	ho.fileAST = createHttpOptionsAST()
-	fset := token.NewFileSet()
-
-	err = printer.Fprint(ho.file, fset, ho.fileAST)
-	if err != nil {
-		return fmt.Errorf("error in generate %s: %w", ho.file.Name(), err)
-	}
-	err = ho.afterGen()
-	if err != nil {
-		return err
-	}
-	return nil
+func (ho *HttpOptionsGenerator) FullPathToFile() string {
+	return ho.fullPathToFile
 }
 
-func createHttpOptionsAST() *ast.File {
+func (ho *HttpOptionsGenerator) GenAST() *ast.File {
 	return &ast.File{
 		Name: ast.NewIdent("httpserver"),
 		Decls: []ast.Decl{
@@ -365,34 +342,4 @@ func createHttpOptionsAST() *ast.File {
 			},
 		},
 	}
-}
-
-func (ho *HttpOptionsGenerator) preGen() error {
-	var err error
-	ho.file, err = os.Create(ho.fullPathToFile)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (ho *HttpOptionsGenerator) afterGen() error {
-	// close file
-	err := ho.file.Close()
-	if err != nil {
-		return fmt.Errorf("error in closing file: %w", err)
-	}
-
-	// download dependency
-	err = util.DownloadDependency(ho.fileAST)
-	if err != nil {
-		return fmt.Errorf("error in download dependency: %w", err)
-	}
-
-	// format code
-	err = util.FormatCode(ho.fullPathToFile)
-	if err != nil {
-		return err
-	}
-	return nil
 }

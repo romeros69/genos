@@ -2,15 +2,23 @@ package app
 
 import (
 	"fmt"
-	"genos/internal/commands"
+	"genos/internal/command"
+	"genos/internal/infrastructure/cli"
+	"genos/internal/infrastructure/files"
+	"genos/internal/infrastructure/folders"
+	"genos/internal/service"
 	"log"
 	"os"
 )
 
 func Run() {
-	generateCommand := new(commands.Generate)
-	helpCommand := new(commands.Help)
-	initLayoutCommand := new(commands.InitLayout)
+	helpUC := service.NewHelpUseCase()
+	cliUC := service.NewCliUC(cli.NewExecuteSLI())
+	folderUC := service.NewFolderUC(folders.NewFolderSource())
+	initLayoutUC := service.NewInitLayout(files.NewFileSource(), cliUC, folderUC)
+
+	initLayoutCommand := command.NewInitLayout(initLayoutUC)
+	helpCommand := command.NewHelp(helpUC)
 
 	countArgs := len(os.Args)
 	if countArgs == 1 {
@@ -23,11 +31,6 @@ func Run() {
 		os.Exit(0)
 	} else {
 		switch {
-		case (os.Args[1] == generateCommand.GetNames()[0]) || (os.Args[1] == generateCommand.GetNames()[1]):
-			err := generateCommand.Do()
-			if err != nil {
-				log.Fatalf("error in do function generateCommand: %s", err) // FIXME - fix handle error
-			}
 		case (os.Args[1] == helpCommand.GetNames()[0]) || (os.Args[1] == helpCommand.GetNames()[1]):
 			err := helpCommand.Do()
 			if err != nil {

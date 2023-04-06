@@ -1,49 +1,27 @@
-package base
+package domain
 
 import (
-	"fmt"
-	"genos/internal/util"
 	"go/ast"
-	"go/printer"
 	"go/token"
-	"os"
 )
 
 type HttpServerGenerator struct {
-	file           *os.File
-	moduleName     string
 	fullPathToFile string
-	fileAST        *ast.File
 }
 
-func NewHttpServerGenerator(moduleName string) *HttpServerGenerator {
+var _ BaseGenerator = (*HttpServerGenerator)(nil)
+
+func NewHttpServerGenerator() *HttpServerGenerator {
 	return &HttpServerGenerator{
-		moduleName:     moduleName,
 		fullPathToFile: "pkg/httpserver/server.go",
 	}
 }
 
-var _ Generator = (*HttpServerGenerator)(nil)
-
-func (hs *HttpServerGenerator) GenerateCode() error {
-	err := hs.preGen()
-	if err != nil {
-		return err
-	}
-	hs.fileAST = createHttpServerAST()
-	fset := token.NewFileSet()
-	err = printer.Fprint(hs.file, fset, hs.fileAST)
-	if err != nil {
-		return fmt.Errorf("error in generate %s: %w", hs.file.Name(), err)
-	}
-	err = hs.afterGen()
-	if err != nil {
-		return err
-	}
-	return nil
+func (hs *HttpServerGenerator) FullPathToFile() string {
+	return hs.fullPathToFile
 }
 
-func createHttpServerAST() *ast.File {
+func (hs *HttpServerGenerator) GenAST() *ast.File {
 	return &ast.File{
 		Name: ast.NewIdent("httpserver"),
 		Decls: []ast.Decl{
@@ -528,34 +506,4 @@ func createHttpServerAST() *ast.File {
 			},
 		},
 	}
-}
-
-func (hs *HttpServerGenerator) preGen() error {
-	var err error
-	hs.file, err = os.Create(hs.fullPathToFile)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (hs *HttpServerGenerator) afterGen() error {
-	// close file
-	err := hs.file.Close()
-	if err != nil {
-		return fmt.Errorf("error in closing file: %w", err)
-	}
-
-	// download dependency
-	err = util.DownloadDependency(hs.fileAST)
-	if err != nil {
-		return fmt.Errorf("error in download dependency: %w", err)
-	}
-
-	// format code
-	err = util.FormatCode(hs.fullPathToFile)
-	if err != nil {
-		return err
-	}
-	return nil
 }

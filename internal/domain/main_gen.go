@@ -1,20 +1,16 @@
-package base
+package domain
 
 import (
-	"fmt"
-	"genos/internal/util"
 	"go/ast"
-	"go/printer"
 	"go/token"
-	"os"
 )
 
 type MainGenerator struct {
-	file           *os.File
 	moduleName     string
 	fullPathToFile string
-	fileAST        *ast.File
 }
+
+var _ BaseGenerator = (*MainGenerator)(nil)
 
 func NewMainGenerator(moduleName string) *MainGenerator {
 	return &MainGenerator{
@@ -23,27 +19,11 @@ func NewMainGenerator(moduleName string) *MainGenerator {
 	}
 }
 
-var _ Generator = (*MainGenerator)(nil)
-
-func (mg *MainGenerator) GenerateCode() error {
-	err := mg.preGen()
-	if err != nil {
-		return err
-	}
-	mg.fileAST = createMainAST(mg.moduleName)
-	fset := token.NewFileSet()
-	err = printer.Fprint(mg.file, fset, mg.fileAST)
-	if err != nil {
-		return fmt.Errorf("error in generate %s: %w", mg.file.Name(), err)
-	}
-	err = mg.afterGen()
-	if err != nil {
-		return err
-	}
-	return nil
+func (mg *MainGenerator) FullPathToFile() string {
+	return mg.fullPathToFile
 }
 
-func createMainAST(moduleName string) *ast.File {
+func (mg *MainGenerator) GenAST() *ast.File {
 	return &ast.File{
 		Name: ast.NewIdent("main"),
 		Decls: []ast.Decl{
@@ -59,13 +39,13 @@ func createMainAST(moduleName string) *ast.File {
 					1: &ast.ImportSpec{
 						Path: &ast.BasicLit{
 							Kind:  token.STRING,
-							Value: "\"" + moduleName + "/configs\"",
+							Value: "\"" + mg.moduleName + "/configs\"",
 						},
 					},
 					2: &ast.ImportSpec{
 						Path: &ast.BasicLit{
 							Kind:  token.STRING,
-							Value: "\"" + moduleName + "/internal/app\"",
+							Value: "\"" + mg.moduleName + "/internal/app\"",
 						},
 					},
 				},
@@ -134,34 +114,4 @@ func createMainAST(moduleName string) *ast.File {
 			},
 		},
 	}
-}
-
-func (mg *MainGenerator) preGen() error {
-	var err error
-	mg.file, err = os.Create(mg.fullPathToFile)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (mg *MainGenerator) afterGen() error {
-	// close file
-	err := mg.file.Close()
-	if err != nil {
-		return fmt.Errorf("error in closing file: %w", err)
-	}
-
-	// download dependency
-	err = util.DownloadDependency(mg.fileAST)
-	if err != nil {
-		return fmt.Errorf("error in download dependency: %w", err)
-	}
-
-	// format code
-	err = util.FormatCode(mg.fullPathToFile)
-	if err != nil {
-		return err
-	}
-	return nil
 }

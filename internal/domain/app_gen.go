@@ -1,20 +1,16 @@
-package base
+package domain
 
 import (
-	"fmt"
-	"genos/internal/util"
 	"go/ast"
-	"go/printer"
 	"go/token"
-	"os"
 )
 
 type AppGenerator struct {
-	file           *os.File
-	moduleName     string
 	fullPathToFile string
-	fileAST        *ast.File
+	moduleName     string
 }
+
+var _ BaseGenerator = (*AppGenerator)(nil)
 
 func NewAppGenerator(moduleName string) *AppGenerator {
 	return &AppGenerator{
@@ -23,27 +19,11 @@ func NewAppGenerator(moduleName string) *AppGenerator {
 	}
 }
 
-var _ Generator = (*AppGenerator)(nil)
-
-func (ag *AppGenerator) GenerateCode() error {
-	err := ag.preGen()
-	if err != nil {
-		return err
-	}
-	ag.fileAST = createAppAST(ag.moduleName)
-	fset := token.NewFileSet()
-	err = printer.Fprint(ag.file, fset, ag.fileAST)
-	if err != nil {
-		return fmt.Errorf("error in generate %s: %w", ag.file.Name(), err)
-	}
-	err = ag.afterGen()
-	if err != nil {
-		return err
-	}
-	return nil
+func (ag *AppGenerator) FullPathToFile() string {
+	return ag.fullPathToFile
 }
 
-func createAppAST(moduleName string) *ast.File {
+func (ag *AppGenerator) GenAST() *ast.File {
 	return &ast.File{
 		Name: ast.NewIdent("app"),
 		Decls: []ast.Decl{
@@ -71,19 +51,19 @@ func createAppAST(moduleName string) *ast.File {
 					3: &ast.ImportSpec{
 						Path: &ast.BasicLit{
 							Kind:  token.STRING,
-							Value: "\"" + moduleName + "/configs\"",
+							Value: "\"" + ag.moduleName + "/configs\"",
 						},
 					},
 					4: &ast.ImportSpec{
 						Path: &ast.BasicLit{
 							Kind:  token.STRING,
-							Value: "\"" + moduleName + "/pkg/httpserver\"",
+							Value: "\"" + ag.moduleName + "/pkg/httpserver\"",
 						},
 					},
 					5: &ast.ImportSpec{
 						Path: &ast.BasicLit{
 							Kind:  token.STRING,
-							Value: "\"" + moduleName + "/pkg/postgres\"",
+							Value: "\"" + ag.moduleName + "/pkg/postgres\"",
 						},
 					},
 					6: &ast.ImportSpec{
@@ -490,34 +470,4 @@ func createAppAST(moduleName string) *ast.File {
 			},
 		},
 	}
-}
-
-func (ag *AppGenerator) preGen() error {
-	var err error
-	ag.file, err = os.Create(ag.fullPathToFile)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (ag *AppGenerator) afterGen() error {
-	// close file
-	err := ag.file.Close()
-	if err != nil {
-		return fmt.Errorf("error in closing file: %w", err)
-	}
-
-	// download dependency
-	err = util.DownloadDependency(ag.fileAST)
-	if err != nil {
-		return fmt.Errorf("error in download dependency: %w", err)
-	}
-
-	// format code
-	err = util.FormatCode(ag.fullPathToFile)
-	if err != nil {
-		return err
-	}
-	return nil
 }

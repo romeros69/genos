@@ -1,49 +1,27 @@
-package base
+package domain
 
 import (
-	"fmt"
-	"genos/internal/util"
 	"go/ast"
-	"go/printer"
 	"go/token"
-	"os"
 )
 
 type ConfigGenerator struct {
-	file           *os.File
-	moduleName     string
 	fullPathToFile string
-	fileAST        *ast.File
 }
 
-func NewConfigGenerator(moduleName string) *ConfigGenerator {
+var _ BaseGenerator = (*ConfigGenerator)(nil)
+
+func NewConfigGenerator() *ConfigGenerator {
 	return &ConfigGenerator{
-		moduleName:     moduleName,
 		fullPathToFile: "configs/configs.go",
 	}
 }
 
-var _ Generator = (*ConfigGenerator)(nil)
-
-func (cg *ConfigGenerator) GenerateCode() error {
-	err := cg.preGen()
-	if err != nil {
-		return err
-	}
-	cg.fileAST = createConfigAST()
-	fset := token.NewFileSet()
-	err = printer.Fprint(cg.file, fset, cg.fileAST)
-	if err != nil {
-		return fmt.Errorf("error in generate %s: %w", cg.file.Name(), err)
-	}
-	err = cg.afterGen()
-	if err != nil {
-		return err
-	}
-	return nil
+func (cg *ConfigGenerator) FullPathToFile() string {
+	return cg.fullPathToFile
 }
 
-func createConfigAST() *ast.File {
+func (cg *ConfigGenerator) GenAST() *ast.File {
 	return &ast.File{
 		Name: ast.NewIdent("configs"),
 		Decls: []ast.Decl{
@@ -265,34 +243,4 @@ func createConfigAST() *ast.File {
 			},
 		},
 	}
-}
-
-func (cg *ConfigGenerator) preGen() error {
-	var err error
-	cg.file, err = os.Create(cg.fullPathToFile)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (cg *ConfigGenerator) afterGen() error {
-	// close file
-	err := cg.file.Close()
-	if err != nil {
-		return fmt.Errorf("error in closing file: %w", err)
-	}
-
-	// download dependency
-	err = util.DownloadDependency(cg.fileAST)
-	if err != nil {
-		return fmt.Errorf("error in download dependency: %w", err)
-	}
-
-	// format code
-	err = util.FormatCode(cg.fullPathToFile)
-	if err != nil {
-		return err
-	}
-	return nil
 }
