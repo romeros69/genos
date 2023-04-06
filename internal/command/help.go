@@ -6,7 +6,11 @@ import (
 )
 
 type Help struct {
-	helpUC service.HelpUC
+	helpUC service.HelpContract
+}
+
+func NewHelp(helpUC service.HelpContract) *Help {
+	return &Help{helpUC: helpUC}
 }
 
 func (h *Help) Do() error {
