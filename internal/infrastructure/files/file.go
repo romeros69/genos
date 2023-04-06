@@ -6,6 +6,7 @@ import (
 	"go/ast"
 	"go/printer"
 	"go/token"
+	"io"
 	"os"
 )
 
@@ -42,4 +43,27 @@ func (fw *FileSource) CloseFile(file *os.File) error {
 		return fmt.Errorf("error in closing file %s: %w", file.Name(), err)
 	}
 	return nil
+}
+
+func (fw *FileSource) OpenFile(fullPathToDSLFile string) (*os.File, error) {
+	file, err := os.Open(fullPathToDSLFile)
+	if err != nil {
+		return nil, fmt.Errorf("error in open file %s: %w", fullPathToDSLFile, err)
+	}
+	return file, nil
+}
+
+func (fw *FileSource) ReadFile(file *os.File) ([]byte, error) {
+	inputBuf := make([]byte, func(f *os.File) int64 {
+		stat, _ := f.Stat()
+		return stat.Size()
+	}(file))
+
+	_, err := file.Read(inputBuf)
+	if err == io.EOF {
+		// maybe...
+	} else if err != nil {
+		return nil, fmt.Errorf("error in read file %s: %w", file.Name(), err)
+	}
+	return inputBuf, nil
 }
