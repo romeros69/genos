@@ -6,19 +6,19 @@ import (
 	"genos/internal/util"
 )
 
-type GenerateBase struct {
+type InitLayoutUC struct {
 	fw  FileSourceWorker
 	cli CliCommandContract
 	fwc FolderContract
 }
 
-func NewGenerateSource(fw FileSourceWorker, cli CliCommandContract, fwc FolderContract) *GenerateBase {
-	return &GenerateBase{fw: fw, cli: cli, fwc: fwc}
+func NewInitLayout(fw FileSourceWorker, cli CliCommandContract, fwc FolderContract) *InitLayoutUC {
+	return &InitLayoutUC{fw: fw, cli: cli, fwc: fwc}
 }
 
-var _ InitLayoutContract = (*GenerateBase)(nil)
+var _ InitLayoutContract = (*InitLayoutUC)(nil)
 
-func (gs *GenerateBase) InitLayoutDo(nameProject, path string) error {
+func (gs *InitLayoutUC) InitLayoutDo(nameProject, path string) error {
 	err := gs.fwc.CreateFolder(nameProject, path)
 	if err != nil {
 		return fmt.Errorf("error InitLayutDo: %w", err)
@@ -34,7 +34,7 @@ func (gs *GenerateBase) InitLayoutDo(nameProject, path string) error {
 	return nil
 }
 
-func (gs *GenerateBase) initBaseGenerators(moduleName string) []domain.BaseGenerator {
+func (gs *InitLayoutUC) initBaseGenerators(moduleName string) []domain.BaseGenerator {
 	return []domain.BaseGenerator{
 		0: domain.NewPostgresOptionGenerator(),
 		1: domain.NewHttpOptionsGenerator(),
@@ -47,7 +47,7 @@ func (gs *GenerateBase) initBaseGenerators(moduleName string) []domain.BaseGener
 }
 
 // Генерация базового кода - все таки это только часть выполнения определенной команды
-func (gs *GenerateBase) generateBaseCode(moduleName string) error {
+func (gs *InitLayoutUC) generateBaseCode(moduleName string) error {
 	baseGenerators := gs.initBaseGenerators(moduleName)
 	for _, v := range baseGenerators {
 		file, err := gs.fw.CreateFile(v.FullPathToFile())
