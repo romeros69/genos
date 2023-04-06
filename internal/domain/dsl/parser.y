@@ -1,5 +1,5 @@
 %{
-package main
+package dsl
 
 const (
   INT = iota
