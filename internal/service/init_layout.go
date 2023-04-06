@@ -4,18 +4,35 @@ import (
 	"fmt"
 	"genos/internal/domain"
 	"genos/internal/util"
-	"os/exec"
 )
 
 type GenerateBase struct {
-	fw FileSourceWorker
+	fw  FileSourceWorker
+	cli CliCommandContract
+	fwc FolderContract
 }
 
-func NewGenerateSource(fw FileSourceWorker) *GenerateBase {
-	return &GenerateBase{fw: fw}
+func NewGenerateSource(fw FileSourceWorker, cli CliCommandContract, fwc FolderContract) *GenerateBase {
+	return &GenerateBase{fw: fw, cli: cli, fwc: fwc}
 }
 
-var _ GenerateBaseContract = (*GenerateBase)(nil)
+var _ InitLayoutContract = (*GenerateBase)(nil)
+
+func (gs *GenerateBase) InitLayoutDo(nameProject, path string) error {
+	err := gs.fwc.CreateFolder(nameProject, path)
+	if err != nil {
+		return fmt.Errorf("error InitLayutDo: %w", err)
+	}
+	err = gs.cli.CreateGoModule(nameProject)
+	if err != nil {
+		return fmt.Errorf("error InitLayutDo: %w", err)
+	}
+	err = gs.generateBaseCode(nameProject)
+	if err != nil {
+		return fmt.Errorf("error InitLayutDo: %w", err)
+	}
+	return nil
+}
 
 func (gs *GenerateBase) initBaseGenerators(moduleName string) []domain.BaseGenerator {
 	return []domain.BaseGenerator{
@@ -50,19 +67,10 @@ func (gs *GenerateBase) generateBaseCode(moduleName string) error {
 		if err != nil {
 			return fmt.Errorf("error in GenerateBaseCode: %w", err)
 		}
-		err = util.FormatCode(v.FullPathToFile())
+		err = gs.cli.Format(v.FullPathToFile())
 		if err != nil {
 			return fmt.Errorf("error in GenerateBaseCode: %w", err)
 		}
-	}
-	return nil
-}
-
-func (gs *GenerateBase) createGoModule(nameProject string) error {
-	cmd := exec.Command("go", "mod", "init", nameProject)
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("error in execute go mod init: %w", err)
 	}
 	return nil
 }
