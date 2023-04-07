@@ -2,7 +2,7 @@ package service
 
 import (
 	"fmt"
-	"genos/internal/domain"
+	"genos/internal/domain/base"
 	"genos/internal/util"
 )
 
@@ -34,15 +34,15 @@ func (gs *InitLayoutUC) InitLayoutDo(nameProject, path string) error {
 	return nil
 }
 
-func (gs *InitLayoutUC) initBaseGenerators(moduleName string) []domain.BaseGenerator {
-	return []domain.BaseGenerator{
-		0: domain.NewPostgresOptionGenerator(),
-		1: domain.NewHttpOptionsGenerator(),
-		2: domain.NewHttpServerGenerator(),
-		3: domain.NewPostgresGenerator(moduleName),
-		4: domain.NewConfigGenerator(),
-		5: domain.NewAppGenerator(moduleName),
-		6: domain.NewMainGenerator(moduleName),
+func (gs *InitLayoutUC) initBaseGenerators(moduleName string) []base.BaseGenerator {
+	return []base.BaseGenerator{
+		0: base.NewPostgresOptionGenerator(),
+		1: base.NewHttpOptionsGenerator(),
+		2: base.NewHttpServerGenerator(),
+		3: base.NewPostgresGenerator(moduleName),
+		4: base.NewConfigGenerator(),
+		5: base.NewAppGenerator(moduleName),
+		6: base.NewMainGenerator(moduleName),
 	}
 }
 

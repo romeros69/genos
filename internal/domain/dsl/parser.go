@@ -34,29 +34,29 @@ const (
 	LIST   = "list"
 )
 
-type field struct {
-	tokType int
-	name    string
+type Field struct {
+	TokType int
+	Name    string
 }
 
-type ent struct {
-	name    string
-	fields  []field
-	actions []string
+type Ent struct {
+	Name    string
+	Fields  []Field
+	Actions []string
 }
 
 type AST struct {
-	entities []ent
+	Entities []Ent
 }
 
 //line ./internal/domain/dsl/parser.y:48
 type yySymType struct {
 	yys      int
 	ast      AST
-	entities []ent
-	ent      ent
-	fields   []field
-	field    field
+	entities []Ent
+	ent      Ent
+	fields   []Field
+	field    Field
 	val      string
 	tokType  int
 	actions  []string
@@ -552,13 +552,13 @@ yydefault:
 		yyDollar = yyS[yypt-1 : yypt+1]
 //line ./internal/domain/dsl/parser.y:96
 		{
-			yyVAL.ast = AST{entities: yyDollar[1].entities}
+			yyVAL.ast = AST{Entities: yyDollar[1].entities}
 		}
 	case 3:
 		yyDollar = yyS[yypt-1 : yypt+1]
 //line ./internal/domain/dsl/parser.y:102
 		{
-			yyVAL.entities = []ent{yyDollar[1].ent}
+			yyVAL.entities = []Ent{yyDollar[1].ent}
 		}
 	case 4:
 		yyDollar = yyS[yypt-2 : yypt+1]
@@ -570,17 +570,17 @@ yydefault:
 		yyDollar = yyS[yypt-7 : yypt+1]
 //line ./internal/domain/dsl/parser.y:111
 		{
-			yyVAL.ent = ent{
-				name:    yyDollar[2].val,
-				fields:  yyDollar[4].fields,
-				actions: yyDollar[7].actions,
+			yyVAL.ent = Ent{
+				Name:    yyDollar[2].val,
+				Fields:  yyDollar[4].fields,
+				Actions: yyDollar[7].actions,
 			}
 		}
 	case 6:
 		yyDollar = yyS[yypt-1 : yypt+1]
 //line ./internal/domain/dsl/parser.y:121
 		{
-			yyVAL.fields = []field{yyDollar[1].field}
+			yyVAL.fields = []Field{yyDollar[1].field}
 		}
 	case 7:
 		yyDollar = yyS[yypt-2 : yypt+1]
@@ -592,7 +592,7 @@ yydefault:
 		yyDollar = yyS[yypt-2 : yypt+1]
 //line ./internal/domain/dsl/parser.y:130
 		{
-			yyVAL.field = field{name: yyDollar[1].val, tokType: yyDollar[2].tokType}
+			yyVAL.field = Field{Name: yyDollar[1].val, TokType: yyDollar[2].tokType}
 		}
 	case 9:
 		yyDollar = yyS[yypt-1 : yypt+1]

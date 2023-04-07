@@ -28,29 +28,29 @@ const (
   LIST   = "list"
 )
 
-type field struct {
-  tokType int
-  name string
+type Field struct {
+  TokType int
+  Name string
 }
 
-type ent struct {
-  name string
-  fields []field
-  actions []string
+type Ent struct {
+  Name string
+  Fields []Field
+  Actions []string
 }
 
 type AST struct {
-  entities []ent
+  Entities []Ent
 }
 
 %}
 
 %union{
   ast AST
-  entities []ent
-  ent ent
-  fields []field
-  field field
+  entities []Ent
+  ent Ent
+  fields []Field
+  field Field
   val string
   tokType int
   actions []string
@@ -94,13 +94,13 @@ main: ast
 
 ast: entities
   {
-    $$ = AST{entities: $1}
+    $$ = AST{Entities: $1}
   }
 
 entities:
   ent
   {
-    $$ = []ent{$1}
+    $$ = []Ent{$1}
   }
 | entities ent
   {
@@ -109,17 +109,17 @@ entities:
 
 ent: EN_TOK IDENT LS_TOK fields RS_TOK ARROW_TOK actions
   {
-    $$ = ent{
-    	name: $2,
-    	fields: $4,
-    	actions: $7,
+    $$ = Ent{
+    	Name: $2,
+    	Fields: $4,
+    	Actions: $7,
     }
   }
 
 fields:
   field
   {
-    $$ = []field{$1}
+    $$ = []Field{$1}
   }
 | fields field
   {
@@ -128,7 +128,7 @@ fields:
 
 field: IDENT type
   {
-    $$ = field{name: $1, tokType: $2}
+    $$ = Field{Name: $1, TokType: $2}
   }
 
 actions:

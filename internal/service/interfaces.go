@@ -9,6 +9,8 @@ import (
 type FileSourceWorker interface {
 	WriteAST(*os.File, *ast.File) error
 	CreateFile(string) (*os.File, error)
+	OpenFile(string) (*os.File, error)
+	ReadFile(*os.File) ([]byte, error)
 	CloseFile(*os.File) error
 	// TODO ReadAST(f *os.File) (*ast.File, error)
 }
@@ -36,4 +38,8 @@ type CliCommandContract interface {
 
 type FolderContract interface {
 	CreateFolder(string, string) error
+}
+
+type GenerateContract interface {
+	GenerateDo(string) error
 }

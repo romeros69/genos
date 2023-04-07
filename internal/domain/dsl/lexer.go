@@ -22,6 +22,14 @@ func NewLex(input []byte) *Lex {
 	return &Lex{input: input}
 }
 
+func Parse(yyLex yyLexer) {
+	_ = yyParse(yyLex)
+}
+
+func (l *Lex) GetResult() AST {
+	return l.result
+}
+
 func (l *Lex) Next() byte {
 	if l.pos >= len(l.input) || l.pos == -1 {
 		if l.pos == len(l.input) {
