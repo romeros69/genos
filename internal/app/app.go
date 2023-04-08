@@ -35,7 +35,7 @@ func Run() {
 	} else {
 		switch {
 		case (os.Args[1] == generateCommand.GetNames()[0]) || (os.Args[1] == generateCommand.GetNames()[1]):
-			err := generateCommand.Do()
+			err := generateCommand.Do(os.Args[2])
 			if err != nil {
 				log.Fatalf("error in do function helpCommand: %s", err) // FIXME - fix handle error
 			}

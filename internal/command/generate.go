@@ -7,8 +7,7 @@ import (
 )
 
 type Generate struct {
-	genUC             service.GenerateContract
-	fullPathToDSLFile string
+	genUC service.GenerateContract
 }
 
 func NewGenerate(genUC service.GenerateContract) *Generate {
@@ -16,32 +15,26 @@ func NewGenerate(genUC service.GenerateContract) *Generate {
 }
 
 // Do TODO добавить проверки пути + установка рабочей директории
-func (g *Generate) Do() error {
-	err := g.readPathToDSL()
+func (g *Generate) Do(pathToDSLFile string) error {
+	err := g.checkExistFile(pathToDSLFile)
 	if err != nil {
 		return fmt.Errorf("error in command Generate Do(): %w", err)
 	}
-	err = g.genUC.GenerateDo(g.fullPathToDSLFile)
+	err = g.genUC.GenerateDo(pathToDSLFile)
 	if err != nil {
 		return fmt.Errorf("error in command Generate Do(): %w", err)
 	}
 	return nil
 }
 
-func (g *Generate) readPathToDSL() error {
-	// читаем путь к файлу dsl
-	fmt.Printf("enter full path to dsl file:\n")
-	_, err := fmt.Scanln(&g.fullPathToDSLFile)
-	if err != nil {
-		return fmt.Errorf("error in reading path to dsl file: %w", err)
-	}
+func (g *Generate) checkExistFile(pathToDSLFile string) error {
 	// проверяем что файл существует
-	_, err = os.Stat(g.fullPathToDSLFile)
+	_, err := os.Stat(pathToDSLFile)
 	if err != nil {
-		return fmt.Errorf("error in get stat file %s: %w", g.fullPathToDSLFile, err)
+		return fmt.Errorf("error in get stat file %s: %w", pathToDSLFile, err)
 	}
 	if os.IsNotExist(err) {
-		return fmt.Errorf("file doesn't exist %s: %w", g.fullPathToDSLFile, err)
+		return fmt.Errorf("file doesn't exist %s: %w", pathToDSLFile, err)
 	}
 	return nil
 }
