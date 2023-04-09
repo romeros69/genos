@@ -1,33 +1,39 @@
-package domain
+package base
 
 import (
 	"go/ast"
 	"go/token"
 )
 
-type PostgresOptionGenerator struct {
+type HttpOptionsGenerator struct {
 	fullPathToFile string
 }
 
-var _ BaseGenerator = (*PostgresOptionGenerator)(nil)
+var _ BaseGenerator = (*HttpOptionsGenerator)(nil)
 
-func NewPostgresOptionGenerator() *PostgresOptionGenerator {
-	return &PostgresOptionGenerator{
-		fullPathToFile: "pkg/postgres/options.go",
+func NewHttpOptionsGenerator() *HttpOptionsGenerator {
+	return &HttpOptionsGenerator{
+		fullPathToFile: "pkg/httpserver/options.go",
 	}
 }
 
-func (po *PostgresOptionGenerator) FullPathToFile() string {
-	return po.fullPathToFile
+func (ho *HttpOptionsGenerator) FullPathToFile() string {
+	return ho.fullPathToFile
 }
 
-func (po *PostgresOptionGenerator) GenAST() *ast.File {
+func (ho *HttpOptionsGenerator) GenAST() *ast.File {
 	return &ast.File{
-		Name: ast.NewIdent("postgres"),
+		Name: ast.NewIdent("httpserver"),
 		Decls: []ast.Decl{
 			0: &ast.GenDecl{
 				Tok: token.IMPORT,
 				Specs: []ast.Spec{
+					&ast.ImportSpec{
+						Path: &ast.BasicLit{
+							Kind:  token.STRING,
+							Value: "\"net\"",
+						},
+					},
 					&ast.ImportSpec{
 						Path: &ast.BasicLit{
 							Kind:  token.STRING,
@@ -46,7 +52,7 @@ func (po *PostgresOptionGenerator) GenAST() *ast.File {
 								List: []*ast.Field{
 									{
 										Type: &ast.StarExpr{
-											X: ast.NewIdent("Postgres"),
+											X: ast.NewIdent("Server"),
 										},
 									},
 								},
@@ -56,15 +62,15 @@ func (po *PostgresOptionGenerator) GenAST() *ast.File {
 				},
 			},
 			2: &ast.FuncDecl{
-				Name: ast.NewIdent("MaxPoolSize"),
+				Name: ast.NewIdent("Port"),
 				Type: &ast.FuncType{
 					Params: &ast.FieldList{
 						List: []*ast.Field{
 							{
 								Names: []*ast.Ident{
-									ast.NewIdent("size"),
+									ast.NewIdent("port"),
 								},
-								Type: ast.NewIdent("int32"),
+								Type: ast.NewIdent("string"),
 							},
 						},
 					},
@@ -86,10 +92,10 @@ func (po *PostgresOptionGenerator) GenAST() *ast.File {
 											List: []*ast.Field{
 												{
 													Names: []*ast.Ident{
-														ast.NewIdent("c"),
+														ast.NewIdent("s"),
 													},
 													Type: &ast.StarExpr{
-														X: ast.NewIdent("Postgres"),
+														X: ast.NewIdent("Server"),
 													},
 												},
 											},
@@ -100,13 +106,28 @@ func (po *PostgresOptionGenerator) GenAST() *ast.File {
 											&ast.AssignStmt{
 												Lhs: []ast.Expr{
 													&ast.SelectorExpr{
-														X:   ast.NewIdent("c"),
-														Sel: ast.NewIdent("maxPoolSize"),
+														X: &ast.SelectorExpr{
+															X:   ast.NewIdent("s"),
+															Sel: ast.NewIdent("server"),
+														},
+														Sel: ast.NewIdent("Addr"),
 													},
 												},
 												Tok: token.ASSIGN,
 												Rhs: []ast.Expr{
-													ast.NewIdent("size"),
+													&ast.CallExpr{
+														Fun: &ast.SelectorExpr{
+															X:   ast.NewIdent("net"),
+															Sel: ast.NewIdent("JoinHostPort"),
+														},
+														Args: []ast.Expr{
+															0: &ast.BasicLit{
+																Kind:  token.STRING,
+																Value: "\"\"",
+															},
+															1: ast.NewIdent("port"),
+														},
+													},
 												},
 											},
 										},
@@ -117,70 +138,9 @@ func (po *PostgresOptionGenerator) GenAST() *ast.File {
 					},
 				},
 			},
+			// 3
 			3: &ast.FuncDecl{
-				Name: ast.NewIdent("ConnAttempts"),
-				Type: &ast.FuncType{
-					Params: &ast.FieldList{
-						List: []*ast.Field{
-							{
-								Names: []*ast.Ident{
-									ast.NewIdent("attempts"),
-								},
-								Type: ast.NewIdent("int"),
-							},
-						},
-					},
-					Results: &ast.FieldList{
-						List: []*ast.Field{
-							{
-								Type: ast.NewIdent("Option"),
-							},
-						},
-					},
-				},
-				Body: &ast.BlockStmt{
-					List: []ast.Stmt{
-						&ast.ReturnStmt{
-							Results: []ast.Expr{
-								&ast.FuncLit{
-									Type: &ast.FuncType{
-										Params: &ast.FieldList{
-											List: []*ast.Field{
-												{
-													Names: []*ast.Ident{
-														ast.NewIdent("c"),
-													},
-													Type: &ast.StarExpr{
-														X: ast.NewIdent("Postgres"),
-													},
-												},
-											},
-										},
-									},
-									Body: &ast.BlockStmt{
-										List: []ast.Stmt{
-											&ast.AssignStmt{
-												Lhs: []ast.Expr{
-													&ast.SelectorExpr{
-														X:   ast.NewIdent("c"),
-														Sel: ast.NewIdent("connAttempts"),
-													},
-												},
-												Tok: token.ASSIGN,
-												Rhs: []ast.Expr{
-													ast.NewIdent("attempts"),
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			4: &ast.FuncDecl{
-				Name: ast.NewIdent("ConnTimeout"),
+				Name: ast.NewIdent("ReadTimeout"),
 				Type: &ast.FuncType{
 					Params: &ast.FieldList{
 						List: []*ast.Field{
@@ -213,10 +173,10 @@ func (po *PostgresOptionGenerator) GenAST() *ast.File {
 											List: []*ast.Field{
 												{
 													Names: []*ast.Ident{
-														ast.NewIdent("c"),
+														ast.NewIdent("s"),
 													},
 													Type: &ast.StarExpr{
-														X: ast.NewIdent("Postgres"),
+														X: ast.NewIdent("Server"),
 													},
 												},
 											},
@@ -227,8 +187,144 @@ func (po *PostgresOptionGenerator) GenAST() *ast.File {
 											&ast.AssignStmt{
 												Lhs: []ast.Expr{
 													&ast.SelectorExpr{
-														X:   ast.NewIdent("c"),
-														Sel: ast.NewIdent("connTimeout"),
+														X: &ast.SelectorExpr{
+															X:   ast.NewIdent("s"),
+															Sel: ast.NewIdent("server"),
+														},
+														Sel: ast.NewIdent("ReadTimeout"),
+													},
+												},
+												Tok: token.ASSIGN,
+												Rhs: []ast.Expr{
+													ast.NewIdent("timeout"),
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			4: &ast.FuncDecl{
+				Name: ast.NewIdent("WriteTimeout"),
+				Type: &ast.FuncType{
+					Params: &ast.FieldList{
+						List: []*ast.Field{
+							{
+								Names: []*ast.Ident{
+									ast.NewIdent("timeout"),
+								},
+								Type: &ast.SelectorExpr{
+									X:   ast.NewIdent("time"),
+									Sel: ast.NewIdent("Duration"),
+								},
+							},
+						},
+					},
+					Results: &ast.FieldList{
+						List: []*ast.Field{
+							{
+								Type: ast.NewIdent("Option"),
+							},
+						},
+					},
+				},
+				Body: &ast.BlockStmt{
+					List: []ast.Stmt{
+						&ast.ReturnStmt{
+							Results: []ast.Expr{
+								&ast.FuncLit{
+									Type: &ast.FuncType{
+										Params: &ast.FieldList{
+											List: []*ast.Field{
+												{
+													Names: []*ast.Ident{
+														ast.NewIdent("s"),
+													},
+													Type: &ast.StarExpr{
+														X: ast.NewIdent("Server"),
+													},
+												},
+											},
+										},
+									},
+									Body: &ast.BlockStmt{
+										List: []ast.Stmt{
+											&ast.AssignStmt{
+												Lhs: []ast.Expr{
+													&ast.SelectorExpr{
+														X: &ast.SelectorExpr{
+															X:   ast.NewIdent("s"),
+															Sel: ast.NewIdent("server"),
+														},
+														Sel: ast.NewIdent("WriteTimeout"),
+													},
+												},
+												Tok: token.ASSIGN,
+												Rhs: []ast.Expr{
+													ast.NewIdent("timeout"),
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			5: &ast.FuncDecl{
+				Name: ast.NewIdent("ShutdownTimeout"),
+				Type: &ast.FuncType{
+					Params: &ast.FieldList{
+						List: []*ast.Field{
+							{
+								Names: []*ast.Ident{
+									ast.NewIdent("timeout"),
+								},
+								Type: &ast.SelectorExpr{
+									X:   ast.NewIdent("time"),
+									Sel: ast.NewIdent("Duration"),
+								},
+							},
+						},
+					},
+					Results: &ast.FieldList{
+						List: []*ast.Field{
+							{
+								Type: ast.NewIdent("Option"),
+							},
+						},
+					},
+				},
+				Body: &ast.BlockStmt{
+					List: []ast.Stmt{
+						&ast.ReturnStmt{
+							Results: []ast.Expr{
+								&ast.FuncLit{
+									Type: &ast.FuncType{
+										Params: &ast.FieldList{
+											List: []*ast.Field{
+												{
+													Names: []*ast.Ident{
+														ast.NewIdent("s"),
+													},
+													Type: &ast.StarExpr{
+														X: ast.NewIdent("Server"),
+													},
+												},
+											},
+										},
+									},
+									Body: &ast.BlockStmt{
+										List: []ast.Stmt{
+											&ast.AssignStmt{
+												Lhs: []ast.Expr{
+													&ast.SelectorExpr{
+														X:   ast.NewIdent("s"),
+														Sel: ast.NewIdent("shutdownTimeout"),
 													},
 												},
 												Tok: token.ASSIGN,

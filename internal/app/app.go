@@ -15,10 +15,13 @@ func Run() {
 	helpUC := service.NewHelpUseCase()
 	cliUC := service.NewCliUC(cli.NewExecuteSLI())
 	folderUC := service.NewFolderUC(folders.NewFolderSource())
-	initLayoutUC := service.NewInitLayout(files.NewFileSource(), cliUC, folderUC)
+	fileSourcseWR := files.NewFileSource()
+	initLayoutUC := service.NewInitLayout(fileSourcseWR, cliUC, folderUC)
+	generateUC := service.NewGenerateUC(fileSourcseWR, cliUC)
 
 	initLayoutCommand := command.NewInitLayout(initLayoutUC)
 	helpCommand := command.NewHelp(helpUC)
+	generateCommand := command.NewGenerate(generateUC)
 
 	countArgs := len(os.Args)
 	if countArgs == 1 {
@@ -31,6 +34,11 @@ func Run() {
 		os.Exit(0)
 	} else {
 		switch {
+		case (os.Args[1] == generateCommand.GetNames()[0]) || (os.Args[1] == generateCommand.GetNames()[1]):
+			err := generateCommand.Do(os.Args[2])
+			if err != nil {
+				log.Fatalf("error in do function helpCommand: %s", err) // FIXME - fix handle error
+			}
 		case (os.Args[1] == helpCommand.GetNames()[0]) || (os.Args[1] == helpCommand.GetNames()[1]):
 			err := helpCommand.Do()
 			if err != nil {

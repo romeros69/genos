@@ -2,7 +2,7 @@ package service
 
 import (
 	"fmt"
-	"genos/internal/domain"
+	"genos/internal/domain/base"
 	"genos/internal/util"
 )
 
@@ -34,22 +34,22 @@ func (gs *InitLayoutUC) InitLayoutDo(nameProject, path string) error {
 	return nil
 }
 
-func (gs *InitLayoutUC) initBaseGenerators(moduleName string) []domain.BaseGenerator {
-	return []domain.BaseGenerator{
-		0: domain.NewPostgresOptionGenerator(),
-		1: domain.NewHttpOptionsGenerator(),
-		2: domain.NewHttpServerGenerator(),
-		3: domain.NewPostgresGenerator(moduleName),
-		4: domain.NewConfigGenerator(),
-		5: domain.NewAppGenerator(moduleName),
-		6: domain.NewMainGenerator(moduleName),
+func (gs *InitLayoutUC) initBaseGenerators(moduleName string) []base.BaseGenerator {
+	return []base.BaseGenerator{
+		0: base.NewPostgresOptionGenerator(),
+		1: base.NewHttpOptionsGenerator(),
+		2: base.NewHttpServerGenerator(),
+		3: base.NewPostgresGenerator(moduleName),
+		4: base.NewConfigGenerator(),
+		5: base.NewAppGenerator(moduleName),
+		6: base.NewMainGenerator(moduleName),
 	}
 }
 
 // Генерация базового кода - все таки это только часть выполнения определенной команды
 func (gs *InitLayoutUC) generateBaseCode(moduleName string) error {
 	baseGenerators := gs.initBaseGenerators(moduleName)
-	for _, v := range baseGenerators {
+	for i, v := range baseGenerators {
 		file, err := gs.fw.CreateFile(v.FullPathToFile())
 		if err != nil {
 			return fmt.Errorf("error in GenerateBaseCode: %w", err)
@@ -63,9 +63,15 @@ func (gs *InitLayoutUC) generateBaseCode(moduleName string) error {
 		if err != nil {
 			return fmt.Errorf("error in GenerateBaseCode: %w", err)
 		}
+		if i == 0 {
+			fmt.Printf("Start download dependency...\n")
+		}
 		err = util.DownloadDependency(newAST)
 		if err != nil {
 			return fmt.Errorf("error in GenerateBaseCode: %w", err)
+		}
+		if i == len(baseGenerators)-1 {
+			fmt.Printf("Complete!\n")
 		}
 		err = gs.cli.Format(v.FullPathToFile())
 		if err != nil {

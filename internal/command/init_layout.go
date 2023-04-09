@@ -34,15 +34,13 @@ func (i *InitLayout) Do() error {
 	return nil
 }
 
+// FIXME - просто энтер
 // Функция установки пути к рабочей директории
 // Путь получается от пользователя
 // Или берется текущая, откужа была запущена программа
 func (i *InitLayout) readWorkDirectory() error {
 	fmt.Printf("Enter full path to work directory, or press `enter` for use this directory\n")
-	_, err := fmt.Scanln(&i.path)
-	if err != nil {
-		return fmt.Errorf("error in scan path in readWorkDirectory(): %w", err)
-	}
+	_, _ = fmt.Scanln(&i.path)
 	if i.path == "" {
 		path, err := os.Getwd()
 		if err != nil {
