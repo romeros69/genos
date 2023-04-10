@@ -43,6 +43,7 @@ func (gs *InitLayoutUC) initBaseGenerators(moduleName string) []base.BaseGenerat
 		4: base.NewConfigGenerator(),
 		5: base.NewAppGenerator(moduleName),
 		6: base.NewMainGenerator(moduleName),
+		7: base.NewRouterGenerator(moduleName),
 	}
 }
 
