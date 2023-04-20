@@ -100,7 +100,13 @@ func (rg *RepositoryGenerator) getQueryForCreate() string {
 	}
 	listNamesFields = strings.Join([]string{"(", listNamesFields, ")"}, "")
 	argsList = strings.Join([]string{"(", argsList, ")"}, "")
-	query := strings.Join([]string{"INSERT INTO", strings.ToLower(rg.entAST.Name), listNamesFields, "VALUES", argsList, "RETURNING", strings.ToLower(rg.entAST.Fields[0].Name)}, " ")
+	query := strings.Join([]string{"INSERT INTO",
+		strings.ToLower(rg.entAST.Name),
+		listNamesFields,
+		"VALUES",
+		argsList,
+		"RETURNING",
+		strings.ToLower(rg.entAST.Fields[0].Name)}, " ")
 	return strings.Join([]string{"\"", query, "\""}, "")
 }
 
