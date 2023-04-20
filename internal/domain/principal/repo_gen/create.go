@@ -91,10 +91,10 @@ func (rg *RepositoryGenerator) getQueryForCreate() string {
 		if i != 0 {
 			if i == len(rg.entAST.Fields)-1 {
 				listNamesFields += field.Name
-				argsList += strconv.Itoa(i)
+				argsList += "$" + strconv.Itoa(i)
 			} else {
 				listNamesFields += field.Name + ", "
-				argsList += strconv.Itoa(i) + ", "
+				argsList += "$" + strconv.Itoa(i) + ", "
 			}
 		}
 	}
