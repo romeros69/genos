@@ -1,13 +1,13 @@
 package repo_gen
 
 import (
-	"genos/internal/util"
 	"go/ast"
 	"go/token"
+	"strconv"
 	"strings"
 )
 
-func (rg *RepositoryGenerator) genDeleteRepoAST() *ast.FuncDecl {
+func (rg *RepositoryGenerator) genUpdateRepoAST() *ast.FuncDecl {
 	return &ast.FuncDecl{
 		Recv: &ast.FieldList{
 			List: []*ast.Field{
@@ -21,7 +21,7 @@ func (rg *RepositoryGenerator) genDeleteRepoAST() *ast.FuncDecl {
 				},
 			},
 		},
-		Name: ast.NewIdent(strings.Join([]string{"Delete", rg.entAST.Name}, "")),
+		Name: ast.NewIdent(strings.Join([]string{"Update", rg.entAST.Name}, "")),
 		Type: &ast.FuncType{
 			Params: &ast.FieldList{
 				List: []*ast.Field{
@@ -36,9 +36,12 @@ func (rg *RepositoryGenerator) genDeleteRepoAST() *ast.FuncDecl {
 					},
 					1: {
 						Names: []*ast.Ident{
-							ast.NewIdent(strings.ToLower(rg.entAST.Fields[0].Name)),
+							ast.NewIdent(strings.ToLower(rg.entAST.Name)),
 						},
-						Type: ast.NewIdent(util.TypesMap[rg.entAST.Fields[0].TokType]),
+						Type: &ast.SelectorExpr{
+							X:   ast.NewIdent("entity"),
+							Sel: ast.NewIdent(rg.entAST.Name),
+						},
 					},
 				},
 			},
@@ -52,17 +55,17 @@ func (rg *RepositoryGenerator) genDeleteRepoAST() *ast.FuncDecl {
 		},
 		Body: &ast.BlockStmt{
 			List: []ast.Stmt{
-				0: rg.genQueryAssignDelete(),
-				1: rg.genExecuteQueryDelete(),
-				2: rg.genCheckErrorQueryDelete(),
-				3: rg.genDeferDelete(),
-				4: rg.genReturnStatementDelete(),
+				0: rg.genQueryAssignUpdate(),
+				1: rg.genExecuteQueryUpdate(),
+				2: rg.genCheckErrorQueryUpdate(),
+				3: rg.genDeferUpdate(),
+				4: rg.genReturnStatementUpdate(),
 			},
 		},
 	}
 }
 
-func (rg *RepositoryGenerator) genQueryAssignDelete() *ast.AssignStmt {
+func (rg *RepositoryGenerator) genQueryAssignUpdate() *ast.AssignStmt {
 	return &ast.AssignStmt{
 		Lhs: []ast.Expr{
 			ast.NewIdent("query"),
@@ -71,25 +74,31 @@ func (rg *RepositoryGenerator) genQueryAssignDelete() *ast.AssignStmt {
 		Rhs: []ast.Expr{
 			&ast.BasicLit{
 				Kind:  token.STRING,
-				Value: rg.getQueryForDelete(),
+				Value: rg.getQueryForUpdate(),
 			},
 		},
 	}
 }
 
-func (rg *RepositoryGenerator) getQueryForDelete() string {
+func (rg *RepositoryGenerator) getQueryForUpdate() string {
+	strFields := ""
+	for i := 1; i < len(rg.entAST.Fields); i++ {
+		if i != len(rg.entAST.Fields)-1 {
+			strFields += strings.Join([]string{strings.ToLower(rg.entAST.Fields[i].Name), "=$", strconv.Itoa(i), ", "}, "")
+		} else {
+			strFields += strings.Join([]string{strings.ToLower(rg.entAST.Fields[i].Name), "=$", strconv.Itoa(i)}, "")
+		}
+	}
 	return strings.Join([]string{
-		"DELETE",
-		"*",
-		"FROM",
+		"UPDATE",
 		strings.ToLower(rg.entAST.Name),
+		"SET",
+		strFields,
 		"WHERE",
-		strings.ToLower(rg.entAST.Fields[0].Name),
-		"=",
-		"$1"}, " ")
+		strings.ToLower(rg.entAST.Fields[0].Name), "=", "$" + strconv.Itoa(len(rg.entAST.Fields))}, " ")
 }
 
-func (rg *RepositoryGenerator) genExecuteQueryDelete() *ast.AssignStmt {
+func (rg *RepositoryGenerator) genExecuteQueryUpdate() *ast.AssignStmt {
 	return &ast.AssignStmt{
 		Lhs: []ast.Expr{
 			0: ast.NewIdent("rows"),
@@ -108,21 +117,29 @@ func (rg *RepositoryGenerator) genExecuteQueryDelete() *ast.AssignStmt {
 					},
 					Sel: ast.NewIdent("Query"),
 				},
-				Args: []ast.Expr{
-					0: ast.NewIdent("ctx"),
-					1: ast.NewIdent("query"),
-					2: ast.NewIdent(strings.ToLower(rg.entAST.Fields[0].Name)),
-				},
+				Args: func() []ast.Expr {
+					result := []ast.Expr{
+						0: ast.NewIdent("ctx"),
+						1: ast.NewIdent("query"),
+					}
+					for i := 1; i < len(rg.entAST.Fields); i++ {
+						result = append(result, &ast.SelectorExpr{
+							X:   ast.NewIdent(strings.ToLower(rg.entAST.Name)),
+							Sel: ast.NewIdent(rg.entAST.Fields[i].Name),
+						})
+					}
+					return result
+				}(),
 			},
 		},
 	}
 }
 
-func (rg *RepositoryGenerator) genCheckErrorQueryDelete() *ast.IfStmt {
+func (rg *RepositoryGenerator) genCheckErrorQueryUpdate() *ast.IfStmt {
 	return &ast.IfStmt{
 		Cond: &ast.BinaryExpr{
 			X:  ast.NewIdent("err"),
-			Op: token.NEQ,
+			Op: token.DEFINE,
 			Y:  ast.NewIdent("nil"),
 		},
 		Body: &ast.BlockStmt{
@@ -149,7 +166,7 @@ func (rg *RepositoryGenerator) genCheckErrorQueryDelete() *ast.IfStmt {
 	}
 }
 
-func (rg *RepositoryGenerator) genDeferDelete() *ast.DeferStmt {
+func (rg *RepositoryGenerator) genDeferUpdate() *ast.DeferStmt {
 	return &ast.DeferStmt{
 		Call: &ast.CallExpr{
 			Fun: &ast.SelectorExpr{
@@ -160,7 +177,7 @@ func (rg *RepositoryGenerator) genDeferDelete() *ast.DeferStmt {
 	}
 }
 
-func (rg *RepositoryGenerator) genReturnStatementDelete() *ast.ReturnStmt {
+func (rg *RepositoryGenerator) genReturnStatementUpdate() *ast.ReturnStmt {
 	return &ast.ReturnStmt{
 		Results: []ast.Expr{
 			ast.NewIdent("nil"),
