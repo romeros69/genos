@@ -1,6 +1,7 @@
 package command
 
 import (
+	"bufio"
 	"fmt"
 	"genos/internal/service"
 	"os"
@@ -29,7 +30,15 @@ func (g *Generate) Do(pathToDSLFile string) error {
 	if err != nil {
 		return fmt.Errorf("error in command Generate Do(): %w", err)
 	}
-	err = g.genUC.GenerateDo(pathToDSLFile)
+	err = g.checkExistsGoSum()
+	if err != nil {
+		return err
+	}
+	nameModule, err := g.getModuleName()
+	if err != nil {
+		return err
+	}
+	err = g.genUC.GenerateDo(nameModule, pathToDSLFile)
 	if err != nil {
 		return fmt.Errorf("error in command Generate Do(): %w", err)
 	}
@@ -67,6 +76,37 @@ func (g *Generate) checkCurrentWorkDir() error {
 		return fmt.Errorf("you are not at the root of the project")
 	}
 	return nil
+}
+
+func (g *Generate) checkExistsGoSum() error {
+	_, err := os.Stat("go.mod")
+	if err != nil {
+		return fmt.Errorf("error in get stat file go.mod: %w", err)
+	}
+	if os.IsNotExist(err) {
+		return fmt.Errorf("go module not found")
+	}
+	return nil
+}
+
+func (g *Generate) getModuleName() (string, error) {
+	file, err := os.Open("go.mod") // открытие файла
+	if err != nil {                // обработка ошибок
+		panic(err)
+	}
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			fmt.Println("Error in closing go.mod")
+		}
+	}(file)
+
+	scanner := bufio.NewScanner(file) // создание сканера
+
+	if scanner.Scan() { // чтение первой строки
+		return strings.Split(scanner.Text(), " ")[1], nil // вывод строки в консоль
+	}
+	return "", fmt.Errorf("not found module")
 }
 
 func (g *Generate) GetNames() []string {
