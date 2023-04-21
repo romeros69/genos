@@ -89,13 +89,14 @@ func (rg *RepositoryGenerator) getQueryForUpdate() string {
 			strFields += strings.Join([]string{strings.ToLower(rg.entAST.Fields[i].Name), "=$", strconv.Itoa(i)}, "")
 		}
 	}
-	return strings.Join([]string{
+	query := strings.Join([]string{
 		"UPDATE",
 		strings.ToLower(rg.entAST.Name),
 		"SET",
 		strFields,
 		"WHERE",
 		strings.ToLower(rg.entAST.Fields[0].Name), "=", "$" + strconv.Itoa(len(rg.entAST.Fields))}, " ")
+	return strings.Join([]string{"\"", query, "\""}, "")
 }
 
 func (rg *RepositoryGenerator) genExecuteQueryUpdate() *ast.AssignStmt {
@@ -139,7 +140,7 @@ func (rg *RepositoryGenerator) genCheckErrorQueryUpdate() *ast.IfStmt {
 	return &ast.IfStmt{
 		Cond: &ast.BinaryExpr{
 			X:  ast.NewIdent("err"),
-			Op: token.DEFINE,
+			Op: token.NEQ,
 			Y:  ast.NewIdent("nil"),
 		},
 		Body: &ast.BlockStmt{

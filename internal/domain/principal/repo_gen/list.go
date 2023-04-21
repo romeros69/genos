@@ -217,7 +217,7 @@ func (rg *RepositoryGenerator) genCycleForReadResultsQueryList() *ast.ForStmt {
 				2: &ast.IfStmt{
 					Cond: &ast.BinaryExpr{
 						X:  ast.NewIdent("err"),
-						Op: token.DEFINE,
+						Op: token.NEQ,
 						Y:  ast.NewIdent("nil"),
 					},
 					Body: &ast.BlockStmt{
@@ -245,14 +245,14 @@ func (rg *RepositoryGenerator) genCycleForReadResultsQueryList() *ast.ForStmt {
 				},
 				3: &ast.AssignStmt{
 					Lhs: []ast.Expr{
-						ast.NewIdent(strings.ToLower(rg.entAST.Name) + "s"),
+						ast.NewIdent(strings.ToLower(rg.entAST.Name) + "List"),
 					},
 					Tok: token.ASSIGN,
 					Rhs: []ast.Expr{
 						&ast.CallExpr{
 							Fun: ast.NewIdent("append"),
 							Args: []ast.Expr{
-								0: ast.NewIdent(strings.ToLower(rg.entAST.Name) + "s"),
+								0: ast.NewIdent(strings.ToLower(rg.entAST.Name) + "List"),
 								1: ast.NewIdent(strings.ToLower(rg.entAST.Name)),
 							},
 						},
@@ -266,7 +266,7 @@ func (rg *RepositoryGenerator) genCycleForReadResultsQueryList() *ast.ForStmt {
 func (rg *RepositoryGenerator) genReturnStatementList() *ast.ReturnStmt {
 	return &ast.ReturnStmt{
 		Results: []ast.Expr{
-			0: ast.NewIdent(strings.ToLower(rg.entAST.Name) + "s"),
+			0: ast.NewIdent(strings.ToLower(rg.entAST.Name) + "List"),
 			1: ast.NewIdent("nil"),
 		},
 	}

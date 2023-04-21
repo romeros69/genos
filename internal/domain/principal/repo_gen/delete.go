@@ -78,7 +78,7 @@ func (rg *RepositoryGenerator) genQueryAssignDelete() *ast.AssignStmt {
 }
 
 func (rg *RepositoryGenerator) getQueryForDelete() string {
-	return strings.Join([]string{
+	query := strings.Join([]string{
 		"DELETE",
 		"*",
 		"FROM",
@@ -87,6 +87,7 @@ func (rg *RepositoryGenerator) getQueryForDelete() string {
 		strings.ToLower(rg.entAST.Fields[0].Name),
 		"=",
 		"$1"}, " ")
+	return strings.Join([]string{"\"", query, "\""}, "")
 }
 
 func (rg *RepositoryGenerator) genExecuteQueryDelete() *ast.AssignStmt {

@@ -18,10 +18,10 @@ func NewEntityGenerator() *EntityGenerator {
 	}
 }
 
-func (eg *EntityGenerator) GetMapAST(astDSL *dsl.AST) map[string]*ast.File {
-	resultMap := make(map[string]*ast.File, len(astDSL.Entities))
-	for _, v := range astDSL.Entities {
-		resultMap[eg.getFullPathToFile(strings.ToLower(v.Name), eg.fullPathToPackage)] = eg.genAST(v)
+func (eg *EntityGenerator) GetMapAST(dslAST *dsl.AST) map[string]*ast.File {
+	resultMap := make(map[string]*ast.File, len(dslAST.Entities))
+	for _, entityAST := range dslAST.Entities {
+		resultMap[eg.getFullPathToFile(strings.ToLower(entityAST.Name))] = eg.genAST(entityAST)
 	}
 	return resultMap
 }
@@ -57,6 +57,6 @@ func (eg *EntityGenerator) getFieldsList(fieldsDSL []dsl.Field) *ast.FieldList {
 	return &ast.FieldList{List: listField}
 }
 
-func (eg *EntityGenerator) getFullPathToFile(nameEntity, fullPathToPackage string) string {
-	return fullPathToPackage + nameEntity + ".go"
+func (eg *EntityGenerator) getFullPathToFile(nameEntity string) string {
+	return strings.Join([]string{eg.fullPathToPackage, nameEntity, ".go"}, "")
 }

@@ -6,18 +6,31 @@ import (
 	"genos/internal/domain/dsl"
 	"go/ast"
 	"go/token"
+	"strings"
 )
 
 type RepositoryGenerator struct {
-	entAST     *dsl.Ent
-	moduleName string
+	entAST            *dsl.Ent
+	moduleName        string
+	fullPathToPackage string
 }
 
 func NewRepositoryGenerator(moduleName string) *RepositoryGenerator {
-	return &RepositoryGenerator{moduleName: moduleName}
+	return &RepositoryGenerator{
+		moduleName:        moduleName,
+		fullPathToPackage: "internal/usecase/repo/",
+	}
 }
 
-func (rg *RepositoryGenerator) GenRepoAST(entAST *dsl.Ent) *ast.File {
+func (rg *RepositoryGenerator) GetMapRepoAST(dslAST *dsl.AST) map[string]*ast.File {
+	resultMap := make(map[string]*ast.File, len(dslAST.Entities))
+	for _, entityAST := range dslAST.Entities {
+		resultMap[rg.getFullPathToFile(strings.ToLower(entityAST.Name))] = rg.genRepoAST(&entityAST)
+	}
+	return resultMap
+}
+
+func (rg *RepositoryGenerator) genRepoAST(entAST *dsl.Ent) *ast.File {
 	rg.entAST = entAST
 	resultAST := rg.repositoryBaseAST()
 	for _, action := range entAST.Actions {
@@ -182,4 +195,8 @@ func (rg *RepositoryGenerator) repositoryBaseAST() *ast.File {
 			},
 		},
 	}
+}
+
+func (rg *RepositoryGenerator) getFullPathToFile(nameEntity string) string {
+	return strings.Join([]string{rg.fullPathToPackage, nameEntity, "_pg.go"}, "")
 }

@@ -88,20 +88,21 @@ func (rg *RepositoryGenerator) genQueryAssignRead() *ast.AssignStmt {
 }
 
 func (rg *RepositoryGenerator) getQueryForRead() string {
-	return strings.Join([]string{
+	query := strings.Join([]string{
 		"SELECT",
 		"*",
 		"FROM",
 		strings.ToLower(rg.entAST.Name), "WHERE",
 		strings.ToLower(rg.entAST.Fields[0].Name), "=", "$1"},
 		" ")
+	return strings.Join([]string{"\"", query, "\""}, "")
 }
 
 func (rg *RepositoryGenerator) genExecuteQueryRead() *ast.AssignStmt {
 	return &ast.AssignStmt{
 		Lhs: []ast.Expr{
-			1: ast.NewIdent("rows"),
-			2: ast.NewIdent("err"),
+			0: ast.NewIdent("rows"),
+			1: ast.NewIdent("err"),
 		},
 		Tok: token.DEFINE,
 		Rhs: []ast.Expr{
