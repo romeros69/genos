@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"genos/internal/domain/base"
-	"genos/internal/util"
 )
 
 type InitLayoutUC struct {
@@ -50,7 +49,7 @@ func (gs *InitLayoutUC) initBaseGenerators(moduleName string) []base.BaseGenerat
 // Генерация базового кода - все таки это только часть выполнения определенной команды
 func (gs *InitLayoutUC) generateBaseCode(moduleName string) error {
 	baseGenerators := gs.initBaseGenerators(moduleName)
-	for i, v := range baseGenerators {
+	for _, v := range baseGenerators {
 		file, err := gs.fw.CreateFile(v.FullPathToFile())
 		if err != nil {
 			return fmt.Errorf("error in GenerateBaseCode: %w", err)
@@ -64,16 +63,17 @@ func (gs *InitLayoutUC) generateBaseCode(moduleName string) error {
 		if err != nil {
 			return fmt.Errorf("error in GenerateBaseCode: %w", err)
 		}
-		if i == 0 {
-			fmt.Printf("Start download dependency...\n")
-		}
-		err = util.DownloadDependency(newAST)
-		if err != nil {
-			return fmt.Errorf("error in GenerateBaseCode: %w", err)
-		}
-		if i == len(baseGenerators)-1 {
-			fmt.Printf("Complete!\n")
-		}
+		//if i == 0 {
+		//	fmt.Printf("Start download dependency...\n")
+		//}
+		// FIXME
+		//err = util.DownloadDependency(newAST)
+		//if err != nil {
+		//	return fmt.Errorf("error in GenerateBaseCode: %w", err)
+		//}
+		//if i == len(baseGenerators)-1 {
+		//	fmt.Printf("Complete!\n")
+		//}
 		err = gs.cli.Format(v.FullPathToFile())
 		if err != nil {
 			return fmt.Errorf("error in GenerateBaseCode: %w", err)
