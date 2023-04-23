@@ -5,6 +5,7 @@ import (
 	"genos/internal/domain/dsl"
 	"genos/internal/domain/principal"
 	"genos/internal/domain/principal/repo_gen"
+	"genos/internal/domain/principal/usecase_gen"
 )
 
 type GenerateUC struct {
@@ -29,6 +30,10 @@ func (g *GenerateUC) GenerateDo(nameModule, fullPathToDSLFile string) error {
 		return fmt.Errorf("error in GenerateDo: %w", err)
 	}
 	err = g.generateRepository(nameModule, &dslAST)
+	if err != nil {
+		return fmt.Errorf("error in GenerateDo: %w", err)
+	}
+	err = g.generateUseCase(nameModule, &dslAST)
 	if err != nil {
 		return fmt.Errorf("error in GenerateDo: %w", err)
 	}
@@ -107,6 +112,30 @@ func (g *GenerateUC) generateRepository(nameModule string, dslAST *dsl.AST) erro
 		err = g.cli.Format(path)
 		if err != nil {
 			return fmt.Errorf("error in generateRepository: %w", err)
+		}
+	}
+	return nil
+}
+
+func (g *GenerateUC) generateUseCase(nameModule string, dslAST *dsl.AST) error {
+	ucGeneratot := usecase_gen.NewUseCaseGenerator(nameModule)
+	ucMapAST := ucGeneratot.GetMapUseCaseAST(dslAST)
+	for path, ucAST := range ucMapAST {
+		file, err := g.fs.CreateFile(path)
+		if err != nil {
+			return fmt.Errorf("error in generateUseCase: %w", err)
+		}
+		err = g.fs.WriteAST(file, ucAST)
+		if err != nil {
+			return fmt.Errorf("error in generateUseCase: %w", err)
+		}
+		err = g.fs.CloseFile(file)
+		if err != nil {
+			return fmt.Errorf("error in generateUseCase: %w", err)
+		}
+		err = g.cli.Format(path)
+		if err != nil {
+			return fmt.Errorf("error in generateUseCase: %w", err)
 		}
 	}
 	return nil
