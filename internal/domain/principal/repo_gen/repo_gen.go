@@ -52,7 +52,7 @@ func (rg *RepositoryGenerator) genRepoAST(entAST *dsl.Ent) *ast.File {
 
 // генерация базовго кода для файла репозитория (без самих ручек)
 func (rg *RepositoryGenerator) repositoryBaseAST() *ast.File {
-	moduleName := "lol" // FIXME
+	moduleName := rg.moduleName
 	entityName := rg.entAST.Name
 
 	return &ast.File{

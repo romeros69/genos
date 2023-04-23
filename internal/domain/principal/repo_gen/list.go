@@ -21,7 +21,7 @@ func (rg *RepositoryGenerator) genListRepoAST() *ast.FuncDecl {
 				},
 			},
 		},
-		Name: ast.NewIdent("Get" + nameEntity + "s"),
+		Name: ast.NewIdent("Get" + nameEntity + "List"),
 		Type: &ast.FuncType{
 			Params: &ast.FieldList{
 				List: []*ast.Field{
