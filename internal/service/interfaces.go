@@ -41,5 +41,5 @@ type FolderContract interface {
 }
 
 type GenerateContract interface {
-	GenerateDo(string) error
+	GenerateDo(string, string) error
 }

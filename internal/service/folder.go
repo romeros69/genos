@@ -51,6 +51,10 @@ func (f *FolderUC) CreateFolder(nameProject, path string) error {
 	if err != nil {
 		return fmt.Errorf("error in CreateFolder: %w", err)
 	}
+	err = f.fWork.CreateDir("internal/controller/http", perm)
+	if err != nil {
+		return fmt.Errorf("error in CreateFolder: %w", err)
+	}
 	err = f.fWork.CreateDir("internal/entity", perm)
 	if err != nil {
 		return fmt.Errorf("error in CreateFolder: %w", err)

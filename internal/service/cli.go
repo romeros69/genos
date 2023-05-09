@@ -29,3 +29,7 @@ func (c *CliUC) CreateGoModule(nameProject string) error {
 	}
 	return nil
 }
+
+func (c *CliUC) DownloadDependency() {
+	panic("ops")
+}
