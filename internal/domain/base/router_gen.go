@@ -36,6 +36,12 @@ func (rg *RouterGenerator) GenAST() *ast.File {
 							Value: "\"github.com/gin-gonic/gin\"",
 						},
 					},
+					1: &ast.ImportSpec{
+						Path: &ast.BasicLit{
+							Kind:  token.STRING,
+							Value: "\"" + rg.moduleName + "/internal/usecase" + "\"",
+						},
+					},
 				},
 			},
 			1: &ast.FuncDecl{

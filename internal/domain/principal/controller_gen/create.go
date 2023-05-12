@@ -44,8 +44,7 @@ func (cg *ControllerHTTPGenerator) genCreateControllerAST() *ast.FuncDecl {
 				1: cg.genParseRequestCreate(),
 				2: cg.genCallServiceCreate(),
 				3: cg.genCheckCallServiceCreate(),
-				4: cg.genHeaderCreate(),
-				5: cg.genSendResponseCreate(),
+				4: cg.genSendResponseCreate(),
 			},
 		},
 	}
@@ -202,44 +201,6 @@ func (cg *ControllerHTTPGenerator) genCheckCallServiceCreate() *ast.IfStmt {
 	}
 }
 
-func (cg *ControllerHTTPGenerator) genHeaderCreate() *ast.ExprStmt {
-	return &ast.ExprStmt{
-		X: &ast.CallExpr{
-			Fun: &ast.SelectorExpr{
-				X:   ast.NewIdent("c"),
-				Sel: ast.NewIdent("Header"),
-			},
-			Args: []ast.Expr{
-				0: &ast.BasicLit{
-					Kind:  token.STRING,
-					Value: "\"Location\"",
-				},
-				1: &ast.CallExpr{
-					Fun: &ast.SelectorExpr{
-						X:   ast.NewIdent("fmt"),
-						Sel: ast.NewIdent("Sprintf"),
-					},
-					Args: []ast.Expr{
-						0: &ast.BasicLit{
-							Kind:  token.STRING,
-							Value: "\"/api/v1/" + strings.ToLower(cg.entAST.Name) + "/%s\"",
-						},
-						1: &ast.CallExpr{
-							Fun: &ast.SelectorExpr{
-								X:   ast.NewIdent("strconv"),
-								Sel: ast.NewIdent("Itoa"),
-							},
-							Args: []ast.Expr{
-								ast.NewIdent(strings.ToLower(cg.entAST.Fields[0].Name)),
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-}
-
 func (cg *ControllerHTTPGenerator) genSendResponseCreate() *ast.ExprStmt {
 	return &ast.ExprStmt{
 		X: &ast.CallExpr{
@@ -252,7 +213,7 @@ func (cg *ControllerHTTPGenerator) genSendResponseCreate() *ast.ExprStmt {
 					X:   ast.NewIdent("http"),
 					Sel: ast.NewIdent("StatusCreated"),
 				},
-				1: ast.NewIdent("nil"),
+				1: ast.NewIdent("id"),
 			},
 		},
 	}

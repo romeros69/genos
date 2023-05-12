@@ -1,6 +1,7 @@
 package controller_gen
 
 import (
+	"genos/internal/util"
 	"go/ast"
 	"go/token"
 	"strings"
@@ -219,8 +220,13 @@ func (cg *ControllerHTTPGenerator) genCallServiceUpdate() *ast.AssignStmt {
 							for i, v := range cg.entAST.Fields {
 								if i == 0 {
 									res = append(res, &ast.KeyValueExpr{
-										Key:   ast.NewIdent(v.Name),
-										Value: ast.NewIdent(strings.ToLower(cg.entAST.Name) + v.Name),
+										Key: ast.NewIdent(v.Name),
+										Value: &ast.CallExpr{
+											Fun: ast.NewIdent(util.TypesMap[cg.entAST.Fields[0].TokType]),
+											Args: []ast.Expr{
+												ast.NewIdent(strings.ToLower(cg.entAST.Name) + v.Name),
+											},
+										},
 									})
 								} else {
 									res = append(res, &ast.KeyValueExpr{

@@ -1,6 +1,7 @@
 package controller_gen
 
 import (
+	"genos/internal/util"
 	"go/ast"
 	"go/token"
 	"strings"
@@ -72,7 +73,7 @@ func (cg *ControllerHTTPGenerator) genGetParamQueryDelete() *ast.AssignStmt {
 						Args: []ast.Expr{
 							&ast.BasicLit{
 								Kind:  token.STRING,
-								Value: strings.ToLower(cg.entAST.Fields[0].Name),
+								Value: "\"" + strings.ToLower(cg.entAST.Fields[0].Name) + "\"",
 							},
 						},
 					},
@@ -102,7 +103,7 @@ func (cg *ControllerHTTPGenerator) genCheckGetParamDelete() *ast.IfStmt {
 							},
 							2: &ast.BasicLit{
 								Kind:  token.STRING,
-								Value: "not found",
+								Value: "\"not found\"",
 							},
 						},
 					},
@@ -138,7 +139,12 @@ func (cg *ControllerHTTPGenerator) genCallServiceDelete() *ast.AssignStmt {
 							Sel: ast.NewIdent("Context"),
 						},
 					},
-					1: ast.NewIdent(strings.ToLower(cg.entAST.Name) + "ID"),
+					1: &ast.CallExpr{
+						Fun: ast.NewIdent(util.TypesMap[cg.entAST.Fields[0].TokType]),
+						Args: []ast.Expr{
+							ast.NewIdent(strings.ToLower(cg.entAST.Name) + "ID"),
+						},
+					},
 				},
 			},
 		},

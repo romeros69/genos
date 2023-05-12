@@ -1,6 +1,7 @@
 package controller_gen
 
 import (
+	"genos/internal/util"
 	"go/ast"
 	"go/token"
 	"strings"
@@ -72,7 +73,7 @@ func (cg *ControllerHTTPGenerator) genGetParamQueryRead() *ast.AssignStmt {
 						Args: []ast.Expr{
 							0: &ast.BasicLit{
 								Kind:  token.STRING,
-								Value: strings.ToLower(cg.entAST.Fields[0].Name),
+								Value: "\"" + strings.ToLower(cg.entAST.Fields[0].Name) + "\"",
 							},
 						},
 					},
@@ -86,7 +87,7 @@ func (cg *ControllerHTTPGenerator) genCheckGetParamRead() *ast.IfStmt {
 	return &ast.IfStmt{
 		Cond: &ast.BinaryExpr{
 			X:  ast.NewIdent("err"),
-			Op: token.DEFINE,
+			Op: token.NEQ,
 			Y:  ast.NewIdent("nil"),
 		},
 		Body: &ast.BlockStmt{
@@ -141,7 +142,12 @@ func (cg *ControllerHTTPGenerator) genCallServiceRead() *ast.AssignStmt {
 							Sel: ast.NewIdent("Context"),
 						},
 					},
-					1: ast.NewIdent(strings.ToLower(cg.entAST.Name) + "ID"),
+					1: &ast.CallExpr{
+						Fun: ast.NewIdent(util.TypesMap[cg.entAST.Fields[0].TokType]),
+						Args: []ast.Expr{
+							ast.NewIdent(strings.ToLower(cg.entAST.Name) + "ID"),
+						},
+					},
 				},
 			},
 		},
@@ -152,7 +158,7 @@ func (cg *ControllerHTTPGenerator) genCheckCallServiceRead() *ast.IfStmt {
 	return &ast.IfStmt{
 		Cond: &ast.BinaryExpr{
 			X:  ast.NewIdent("err"),
-			Op: token.DEFINE,
+			Op: token.NEQ,
 			Y:  ast.NewIdent("nil"),
 		},
 		Body: &ast.BlockStmt{

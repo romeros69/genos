@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"genos/internal/domain/dsl"
 	"genos/internal/domain/principal"
+	"genos/internal/domain/principal/controller_gen"
 	"genos/internal/domain/principal/repo_gen"
 	"genos/internal/domain/principal/usecase_gen"
 )
@@ -34,6 +35,10 @@ func (g *GenerateUC) GenerateDo(nameModule, fullPathToDSLFile string) error {
 		return fmt.Errorf("error in GenerateDo: %w", err)
 	}
 	err = g.generateUseCase(nameModule, &dslAST)
+	if err != nil {
+		return fmt.Errorf("error in GenerateDo: %w", err)
+	}
+	err = g.generateController(nameModule, &dslAST)
 	if err != nil {
 		return fmt.Errorf("error in GenerateDo: %w", err)
 	}
@@ -117,9 +122,10 @@ func (g *GenerateUC) generateRepository(nameModule string, dslAST *dsl.AST) erro
 	return nil
 }
 
+// generateUseCase генерирует слой бизнес-логики команд
 func (g *GenerateUC) generateUseCase(nameModule string, dslAST *dsl.AST) error {
-	ucGeneratot := usecase_gen.NewUseCaseGenerator(nameModule)
-	ucMapAST := ucGeneratot.GetMapUseCaseAST(dslAST)
+	ucGenerator := usecase_gen.NewUseCaseGenerator(nameModule)
+	ucMapAST := ucGenerator.GetMapUseCaseAST(dslAST)
 	for path, ucAST := range ucMapAST {
 		file, err := g.fs.CreateFile(path)
 		if err != nil {
@@ -136,6 +142,34 @@ func (g *GenerateUC) generateUseCase(nameModule string, dslAST *dsl.AST) error {
 		err = g.cli.Format(path)
 		if err != nil {
 			return fmt.Errorf("error in generateUseCase: %w", err)
+		}
+	}
+	return nil
+}
+
+func (g *GenerateUC) generateController(nameModule string, dslAST *dsl.AST) error {
+	cGenerator := controller_gen.NewControllerHTTPGenerator(nameModule)
+	routerAST, err := g.fs.ReadAST("internal/controller/http/router.go")
+	if err != nil {
+		return err
+	}
+	cMapAST := cGenerator.GetMapControllerAST(dslAST, routerAST)
+	for path, cAST := range cMapAST {
+		file, err := g.fs.CreateFile(path)
+		if err != nil {
+			return fmt.Errorf("error in generateController: %w", err)
+		}
+		err = g.fs.WriteAST(file, cAST)
+		if err != nil {
+			return fmt.Errorf("error in generateController: %w", err)
+		}
+		err = g.fs.CloseFile(file)
+		if err != nil {
+			return fmt.Errorf("error in generateController: %w", err)
+		}
+		err = g.cli.Format(path)
+		if err != nil {
+			return fmt.Errorf("error in generateController: %w", err)
 		}
 	}
 	return nil
