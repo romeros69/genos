@@ -42,6 +42,10 @@ func (g *GenerateUC) GenerateDo(nameModule, fullPathToDSLFile string) error {
 	if err != nil {
 		return fmt.Errorf("error in GenerateDo: %w", err)
 	}
+	err = g.generateNewAppInit(nameModule, &dslAST)
+	if err != nil {
+		return fmt.Errorf("error in GenerateDo: %w", err)
+	}
 	return nil
 }
 
@@ -171,6 +175,31 @@ func (g *GenerateUC) generateController(nameModule string, dslAST *dsl.AST) erro
 		if err != nil {
 			return fmt.Errorf("error in generateController: %w", err)
 		}
+	}
+	return nil
+}
+
+func (g *GenerateUC) generateNewAppInit(nameModule string, dslAST *dsl.AST) error {
+	path := "internal/app/app.go"
+	appAST, err := g.fs.ReadAST(path)
+	if err != nil {
+		return err
+	}
+	file, err := g.fs.CreateFile(path)
+	if err != nil {
+		return fmt.Errorf("error in generateController: %w", err)
+	}
+	err = g.fs.WriteAST(file, principal.GetUpdateAppInit(nameModule, dslAST, appAST))
+	if err != nil {
+		return fmt.Errorf("error in generateController: %w", err)
+	}
+	err = g.fs.CloseFile(file)
+	if err != nil {
+		return fmt.Errorf("error in generateController: %w", err)
+	}
+	err = g.cli.Format(path)
+	if err != nil {
+		return fmt.Errorf("error in generateController: %w", err)
 	}
 	return nil
 }

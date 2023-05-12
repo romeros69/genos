@@ -2,3 +2,14 @@ entity Pop {
     ID int64
     Name string
 } -> create, read, update, delete, list
+
+entity Car {
+    ID int64
+    Tittle string
+} -> create, read, update, delete, list
+
+entity Lolus {
+    ID int64
+    Tittle string
+    Age uint
+} -> create
