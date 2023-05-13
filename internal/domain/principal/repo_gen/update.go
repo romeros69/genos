@@ -129,6 +129,10 @@ func (rg *RepositoryGenerator) genExecuteQueryUpdate() *ast.AssignStmt {
 							Sel: ast.NewIdent(rg.entAST.Fields[i].Name),
 						})
 					}
+					result = append(result, &ast.SelectorExpr{
+						X:   ast.NewIdent(strings.ToLower(rg.entAST.Name)),
+						Sel: ast.NewIdent(rg.entAST.Fields[0].Name),
+					})
 					return result
 				}(),
 			},

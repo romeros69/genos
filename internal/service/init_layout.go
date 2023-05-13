@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"genos/internal/domain/base"
+	"genos/internal/domain/base/docker"
 )
 
 type InitLayoutUC struct {
@@ -27,6 +28,14 @@ func (gs *InitLayoutUC) InitLayoutDo(nameProject, path string) error {
 		return fmt.Errorf("error InitLayutDo: %w", err)
 	}
 	err = gs.generateBaseCode(nameProject)
+	if err != nil {
+		return fmt.Errorf("error InitLayutDo: %w", err)
+	}
+	err = gs.generateDocker()
+	if err != nil {
+		return fmt.Errorf("error InitLayutDo: %w", err)
+	}
+	err = gs.generateDockerCompose()
 	if err != nil {
 		return fmt.Errorf("error InitLayutDo: %w", err)
 	}
@@ -66,7 +75,7 @@ func (gs *InitLayoutUC) generateBaseCode(moduleName string) error {
 		//if i == 0 {
 		//	fmt.Printf("Start download dependency...\n")
 		//}
-		// FIXME
+		//
 		//err = util.DownloadDependency(newAST)
 		//if err != nil {
 		//	return fmt.Errorf("error in GenerateBaseCode: %w", err)
@@ -78,6 +87,32 @@ func (gs *InitLayoutUC) generateBaseCode(moduleName string) error {
 		if err != nil {
 			return fmt.Errorf("error in GenerateBaseCode: %w", err)
 		}
+	}
+	return nil
+}
+
+func (gs *InitLayoutUC) generateDocker() error {
+	file, err := gs.fw.CreateFile("Dockerfile")
+	if err != nil {
+		return fmt.Errorf("error in generateDocker(): %w", err)
+	}
+	err = gs.fw.WriteByteSliceFile(file, docker.GetDockerFile())
+	err = gs.fw.CloseFile(file)
+	if err != nil {
+		return fmt.Errorf("error in generateDocker(): %w", err)
+	}
+	return nil
+}
+
+func (gs *InitLayoutUC) generateDockerCompose() error {
+	file, err := gs.fw.CreateFile("docker-compose.yml")
+	if err != nil {
+		return fmt.Errorf("error in generateDockerCompose(): %w", err)
+	}
+	err = gs.fw.WriteByteSliceFile(file, docker.GetDockerComposeFile())
+	err = gs.fw.CloseFile(file)
+	if err != nil {
+		return fmt.Errorf("error in generateDockerCompose(): %w", err)
 	}
 	return nil
 }

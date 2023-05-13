@@ -77,3 +77,11 @@ func (fw *FileSource) ReadFile(file *os.File) ([]byte, error) {
 	}
 	return inputBuf, nil
 }
+
+func (fw *FileSource) WriteByteSliceFile(file *os.File, data []byte) error {
+	_, err := file.Write(data)
+	if err != nil {
+		return fmt.Errorf("error in write byte slice to file: %w", err)
+	}
+	return nil
+}

@@ -12,4 +12,4 @@ entity Lolus {
     ID int64
     Tittle string
     Age uint
-} -> create
+} -> create, read, update, delete, list
