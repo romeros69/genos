@@ -1,7 +1,6 @@
 package usecase_gen
 
 import (
-	"fmt"
 	"genos/internal/domain/dsl"
 	"genos/internal/util"
 	"go/ast"
@@ -12,9 +11,6 @@ import (
 func (ug *UseCaseGenerator) genInterfaceAST(dslAST *dsl.AST) *ast.File {
 	resultAST := ug.genBaseInterfacesAST()
 	for _, entityAST := range dslAST.Entities {
-		fmt.Println("1111111")
-		fmt.Println(entityAST.Name)
-		fmt.Println("2222222")
 		resultAST.Decls = append(resultAST.Decls, ug.genInterfaceDeclByEntity(&entityAST, "Contract"))
 		resultAST.Decls = append(resultAST.Decls, ug.genInterfaceDeclByEntity(&entityAST, "Repo"))
 	}

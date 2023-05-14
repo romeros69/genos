@@ -19,7 +19,7 @@ func (e ExecuteCLI) ExecuteCommand(name string, args ...string) error {
 	cmd := exec.Command(name, args...)
 	err := cmd.Run()
 	if err != nil {
-		return fmt.Errorf("error in run go fmt: %w", err)
+		return fmt.Errorf("error in run command \"%s\" \"%s\": %w", name, args[0], err)
 	}
 	return nil
 }

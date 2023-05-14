@@ -12,7 +12,8 @@ type FileSourceWorker interface {
 	OpenFile(string) (*os.File, error)
 	ReadFile(*os.File) ([]byte, error)
 	CloseFile(*os.File) error
-	// TODO ReadAST(f *os.File) (*ast.File, error)
+	ReadAST(string) (*ast.File, error)
+	WriteByteSliceFile(*os.File, []byte) error
 }
 
 type FolderSourceWorker interface {

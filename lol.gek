@@ -1,129 +1,15 @@
+entity Pop {
+    ID int64
+    Name string
+} -> create, read, update, delete, list
+
 entity Car {
     ID int64
     Tittle string
-    Crash bool
-    Volume int
-    Polus string
-    Krinzh rune
-    Check bool
-    Flag uint8
-    CityID int64
-    PeopleID int64
 } -> create, read, update, delete, list
 
-entity CarLol {
+entity Lolus {
     ID int64
     Tittle string
-    Crash bool
-    Volume int
-    Polus string
-    Krinzh rune
-    Check bool
-    Flag uint8
-    CityID int64
-    PeopleID int64
-} -> create, read, update, delete, list
-
-entity CarSes {
-    ID int64
-    Tittle string
-    Crash bool
-    Volume int
-    Polus string
-    Krinzh rune
-    Check bool
-    Flag uint8
-    CityID int64
-    PeopleID int64
-} -> create, read, update, delete, list
-
-entity Carppp {
-    ID int64
-    Tittle string
-    Crash bool
-    Volume int
-    Polus string
-    Krinzh rune
-    Check bool
-    Flag uint8
-    CityID int64
-    PeopleID int64
-} -> create, read, update, delete, list
-
-entity CarSesooo {
-    ID int64
-    Tittle string
-    Crash bool
-    Volume int
-    Polus string
-    Krinzh rune
-    Check bool
-    Flag uint8
-    CityID int64
-    PeopleID int64
-} -> create, read, update, delete, list
-
-entity CarSeswqw {
-    ID int64
-    Tittle string
-    Crash bool
-    Volume int
-    Polus string
-    Krinzh rune
-    Check bool
-    Flag uint8
-    CityID int64
-    PeopleID int64
-} -> create, read, update, delete, list
-
-entity CarSeoius {
-    ID int64
-    Tittle string
-    Crash bool
-    Volume int
-    Polus string
-    Krinzh rune
-    Check bool
-    Flag uint8
-    CityID int64
-    PeopleID int64
-} -> create, read, update, delete, list
-
-entity CarSesnnnn {
-    ID int64
-    Tittle string
-    Crash bool
-    Volume int
-    Polus string
-    Krinzh rune
-    Check bool
-    Flag uint8
-    CityID int64
-    PeopleID int64
-} -> create, read, update, delete, list
-
-entity CarSessosoo {
-    ID int64
-    Tittle string
-    Crash bool
-    Volume int
-    Polus string
-    Krinzh rune
-    Check bool
-    Flag uint8
-    CityID int64
-    PeopleID int64
-} -> create, read, update, delete, list
-
-entity CarPEOWKf {
-    ID int64
-    Tittle string
-    Crash bool
-    Volume int
-    Polus string
-    Krinzh rune
-    Check bool
-    Flag uint8
-    CityID int64
-    PeopleID int64
+    Age uint
 } -> create, read, update, delete, list

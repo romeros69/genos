@@ -67,7 +67,7 @@ func (cg *ConfigGenerator) GenAST() *ast.File {
 										Type: ast.NewIdent("string"),
 										Tag: &ast.BasicLit{
 											Kind:  token.STRING,
-											Value: "`env:\"POSTGRES_HOST\" envDefault:\"localhost\"`",
+											Value: "`env:\"POSTGRES_HOST\" envDefault:\"psql\"`",
 										},
 									},
 									2: {

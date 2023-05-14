@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"genos/internal/service"
 	"go/ast"
+	"go/parser"
 	"go/printer"
 	"go/token"
 	"io"
@@ -37,6 +38,15 @@ func (fw *FileSource) WriteAST(file *os.File, ast *ast.File) error {
 	return nil
 }
 
+func (fw *FileSource) ReadAST(fullPathToFile string) (*ast.File, error) {
+	fset := token.NewFileSet()
+	fileAST, err := parser.ParseFile(fset, fullPathToFile, nil, 0)
+	if err != nil {
+		return nil, fmt.Errorf("error in read AST from file: %w", err)
+	}
+	return fileAST, nil
+}
+
 func (fw *FileSource) CloseFile(file *os.File) error {
 	err := file.Close()
 	if err != nil {
@@ -66,4 +76,12 @@ func (fw *FileSource) ReadFile(file *os.File) ([]byte, error) {
 		return nil, fmt.Errorf("error in read file %s: %w", file.Name(), err)
 	}
 	return inputBuf, nil
+}
+
+func (fw *FileSource) WriteByteSliceFile(file *os.File, data []byte) error {
+	_, err := file.Write(data)
+	if err != nil {
+		return fmt.Errorf("error in write byte slice to file: %w", err)
+	}
+	return nil
 }

@@ -21,7 +21,7 @@ func NewUseCaseGenerator(moduleName string) *UseCaseGenerator {
 }
 
 func (ug *UseCaseGenerator) GetMapUseCaseAST(dslAST *dsl.AST) map[string]*ast.File {
-	resultMap := make(map[string]*ast.File, len(dslAST.Entities))
+	resultMap := make(map[string]*ast.File, len(dslAST.Entities)+1)
 	for _, entityAST := range dslAST.Entities {
 		resultMap[ug.getFullPathToFile(strings.ToLower(entityAST.Name))] = ug.genUseCaseAST(&entityAST)
 	}
