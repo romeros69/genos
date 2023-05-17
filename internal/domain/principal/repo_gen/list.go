@@ -75,10 +75,20 @@ func (rg *RepositoryGenerator) genQueryAssignList() *ast.AssignStmt {
 		Rhs: []ast.Expr{
 			&ast.BasicLit{
 				Kind:  token.STRING,
-				Value: "\"SELECT * FROM " + strings.ToLower(rg.entAST.Name) + "\"",
+				Value: rg.getQueryForList(),
 			},
 		},
 	}
+}
+
+func (rg *RepositoryGenerator) getQueryForList() string {
+	query := strings.Join([]string{
+		"SELECT",
+		"*",
+		"FROM",
+		strings.ToLower(rg.entAST.Name),
+	}, " ")
+	return strings.Join([]string{"\"", query, "\""}, "")
 }
 
 func (rg *RepositoryGenerator) genExecuteQueryList() *ast.AssignStmt {
