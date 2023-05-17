@@ -1,0 +1,17 @@
+entity Tank {
+    ID int
+    Tittle string
+    Crashed bool
+    Count uint
+} -> create, read
+
+entity Car {
+    ID int64
+    Tittle string
+} -> create, read, update
+
+entity Phone {
+    ID int64
+    Tittle string
+    SerialNumber uint
+} -> create, read, update, delete, list

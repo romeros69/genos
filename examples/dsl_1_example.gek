@@ -1,0 +1,5 @@
+entity Car {
+    ID              int64
+    Tittle          string
+    SerialNumber    uint32
+} -> create, read, update, delete, list
