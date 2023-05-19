@@ -1,7 +1,7 @@
 package controller_gen
 
 import (
-	"genos/internal/domain/dsl"
+	"genos/internal/components/dsl"
 	"go/ast"
 	"go/token"
 	"strings"

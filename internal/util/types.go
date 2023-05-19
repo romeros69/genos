@@ -1,7 +1,7 @@
 package util
 
 import (
-	"genos/internal/domain/dsl"
+	"genos/internal/components/dsl"
 	"go/token"
 )
 

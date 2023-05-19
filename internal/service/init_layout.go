@@ -2,8 +2,8 @@ package service
 
 import (
 	"fmt"
-	"genos/internal/domain/base"
-	"genos/internal/domain/base/docker"
+	"genos/internal/components/base"
+	"genos/internal/components/base/docker"
 )
 
 type InitLayoutUC struct {

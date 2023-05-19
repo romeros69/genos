@@ -3,7 +3,7 @@ package repo_gen
 // в этом файле генерация репозитрия, но мб потом вынесу генерацию в другие файли для каждого метода
 
 import (
-	"genos/internal/domain/dsl"
+	"genos/internal/components/dsl"
 	"go/ast"
 	"go/token"
 	"strings"

@@ -2,11 +2,11 @@ package service
 
 import (
 	"fmt"
-	"genos/internal/domain/dsl"
-	"genos/internal/domain/principal"
-	"genos/internal/domain/principal/controller_gen"
-	"genos/internal/domain/principal/repo_gen"
-	"genos/internal/domain/principal/usecase_gen"
+	"genos/internal/components/dsl"
+	"genos/internal/components/principal"
+	"genos/internal/components/principal/controller_gen"
+	"genos/internal/components/principal/repo_gen"
+	"genos/internal/components/principal/usecase_gen"
 )
 
 type GenerateUC struct {

@@ -1,7 +1,7 @@
 package principal
 
 import (
-	"genos/internal/domain/dsl"
+	"genos/internal/components/dsl"
 	"genos/internal/util"
 	"go/ast"
 	"go/token"
