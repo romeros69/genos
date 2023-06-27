@@ -24,6 +24,10 @@ type ExecuteCLI interface {
 	ExecuteCommand(string, ...string) error
 }
 
+type GenerateContract interface {
+	GenerateDo(string, string) error
+}
+
 type HelpContract interface {
 	Help() string
 }
@@ -39,8 +43,4 @@ type CliCommandContract interface {
 
 type FolderContract interface {
 	CreateFolder(string, string) error
-}
-
-type GenerateContract interface {
-	GenerateDo(string, string) error
 }

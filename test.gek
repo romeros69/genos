@@ -1,17 +1,33 @@
-entity Tank {
-    ID int
-    Tittle string
-    Crashed bool
-    Count uint
-} -> create, read
+entity Client {
+    ID int64
+    PassportID string
+    FirstName string
+    LastName string
+    City string
+    Phone string
+} -> create, read, update, delete, list
 
 entity Car {
     ID int64
     Tittle string
-} -> create, read, update
+    Number string
+    BodyType string
+    Color string
+} -> create, read, update, delete, list
 
-entity Phone {
+entity Rental {
     ID int64
-    Tittle string
-    SerialNumber uint
+    ClientID int64
+    CarID int64
+    DateOfIssue string
+    DateOfReturn string
+    EmployeeID int64
+} -> create, read, update, delete, list
+
+entity Employee {
+    ID int64
+    PassportID string
+    FirstName string
+    LastName string
+    Phone string
 } -> create, read, update, delete, list

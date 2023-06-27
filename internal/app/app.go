@@ -35,19 +35,22 @@ func Run() {
 	} else {
 		switch {
 		case (os.Args[1] == generateCommand.GetNames()[0]) || (os.Args[1] == generateCommand.GetNames()[1]):
+			if countArgs == 2 {
+				log.Fatalf("You didn't specify the path to dsl file!")
+			}
 			err := generateCommand.Do(os.Args[2])
 			if err != nil {
-				log.Fatalf("error in do function helpCommand: %s", err) // FIXME - fix handle error
+				log.Fatalf("error in do function helpCommand: %s", err)
 			}
 		case (os.Args[1] == helpCommand.GetNames()[0]) || (os.Args[1] == helpCommand.GetNames()[1]):
 			err := helpCommand.Do()
 			if err != nil {
-				log.Fatalf("error in do function helpCommand: %s", err) // FIXME - fix handle error
+				log.Fatalf("error in do function helpCommand: %s", err)
 			}
 		case (os.Args[1] == initLayoutCommand.GetNames()[0]) || (os.Args[1] == initLayoutCommand.GetNames()[1]):
 			err := initLayoutCommand.Do()
 			if err != nil {
-				log.Fatalf("error in do function initLayoutCommand: %s", err) // FIXME - fix handle error
+				log.Fatalf("error in do function initLayoutCommand: %s", err)
 			}
 		default:
 			fmt.Printf("Unknown command\n" +
